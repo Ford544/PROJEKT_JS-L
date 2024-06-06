@@ -1,7 +1,12 @@
 from consts import *
 
 class Piece:
-    def __init__(self,x,y,color):
+    x : int
+    y : int
+    color : int
+    is_king : bool
+
+    def __init__(self, x : int, y : int, color : int):
         self.x = x
         self.y = y
         self.color = color

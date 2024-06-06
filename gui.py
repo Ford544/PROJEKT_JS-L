@@ -56,8 +56,6 @@ class GUIBoard(QFrame):
         
         self.game = game
         self.tiles = []
-        self.selected = None
-        self.valid_moves = []
 
         self.layout = QGridLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -85,15 +83,18 @@ class GUIBoard(QFrame):
                 #print(f"{i}:{j}: {contents}")
 
                 if i % 2 == j % 2:
-                    if (i,j) == self.selected:
+                    if (i,j) == self.game.selected_tile:
                         tile.setStyleSheet(f'background-color: {SELECTED_WHITE_TILE_COLOR}')
                     else:
                         tile.setStyleSheet(f'background-color: {WHITE_TILE_COLOR}')
                 else:
-                    if (i,j) == self.selected:
+                    if (i,j) == self.game.selected_tile:
                         tile.setStyleSheet(f'background-color: {SELECTED_BROWN_TILE_COLOR}')
                     else:
                         tile.setStyleSheet(f'background-color: {BROWN_TILE_COLOR}')
+
+                marked = self.game.marked_tiles
+                valid_moves = self.game.selected_valid_moves
 
                 if contents is None:
                     tile.content = EMPTY
@@ -109,12 +110,11 @@ class GUIBoard(QFrame):
                         else:  
                             tile.content = BLACK_PIECE
                     #print(self.game.board.marked)
-                    if (contents.x,contents.y) in self.game.board.marked:
+                    if (contents.x,contents.y) in marked:
                         tile.marked = True
                     else:
                         tile.marked = False
-                print(self.valid_moves)
-                if (tile.x, tile.y) in self.valid_moves:
+                if (tile.x, tile.y) in valid_moves:
                     tile.valid_move = True
                 else:
                     tile.valid_move = False
@@ -141,9 +141,11 @@ class Tile(QLabel):
         rect = self.rect()
         center = rect.center()
         if self.content != EMPTY:
-            if self.content == WHITE_PIECE:
+
+            #TODO make kings distinct visually
+            if self.content == WHITE_PIECE or self.content == WHITE_KING:
                 qcolor = QColor(255, 255, 255)
-            if self.content == BLACK_PIECE:
+            if self.content == BLACK_PIECE or self.content == BLACK_KING:
                 qcolor = QColor(0, 0, 0)   
             pen = QPen(qcolor, 3, Qt.SolidLine)
             qp.setPen(pen)
@@ -190,12 +192,5 @@ class GUI:
 
     def update(self):
         self.window.update()
-
-    def set_selected(self, piece):
-        self.window.board.selected = piece
-
-    def set_valid_moves(self, valid_moves):
-        self.window.board.valid_moves = valid_moves
-
 
         
