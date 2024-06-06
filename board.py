@@ -94,9 +94,17 @@ class Board:
         return self.board[x][y]
     
     def get_valid_moves(self, turn : int):
+        longest_jump_length = 0
+        
         for piece in self.pieces:
             if piece.color == turn:
                 self.valid_moves[piece] = self.get_valid_piece_moves(piece)
+                for move in self.valid_moves[piece]:
+                    longest_jump_length = max(longest_jump_length,len(move.jumped))
+        
+        #jumping is obligatory
+        self.valid_moves = {piece : list(filter(lambda move : len(move.jumped) == longest_jump_length, moves)) for piece, moves in self.valid_moves.items()}
+        
         
     
     def get_valid_piece_moves(self, piece : Piece):
@@ -218,6 +226,7 @@ class Board:
     def has_valid_moves(self, piece : Piece):
         return piece in self.valid_moves.keys() and len(self.valid_moves[piece]) > 0 
 
+#TESTING
 if __name__ == "__main__":
     b = Board()
     for i in range(HEIGHT):

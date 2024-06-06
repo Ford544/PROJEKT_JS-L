@@ -1,4 +1,8 @@
 d = {}
 
-for a in d[10]:
-    print("hey")
+def func(l=[]):
+    l.append("hey")
+    print(l)
+
+for a in range(10):
+    func()
