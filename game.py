@@ -28,20 +28,22 @@ class Game:
        self.turn_over = False
        self.gui.init(self)
        self.run()
-       self.gui.run()            
+       # WTF IS EVEN GOING ON LOL
+       #self.gui.run()            
 
 
     def run(self):
         print("run")
-        while self.board.winner == 0:
+        while self.board.winner == 0 and self.gui.window.open:
             self.player1.make_move()
             if self.turn_over:
                 self.player1,self.player2 = self.player2,self.player1
                 self.turn_over = False
         if self.board.winner == BLACK:
             print("Black has won!")
-        else:
+        elif self.board.winner == WHITE:
             print("White has won!")
+        print("gello")
 
     def run_turn(self):
         print((self.active_player))

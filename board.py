@@ -86,9 +86,14 @@ class Board:
             return WHITE
         if self.whites == 0:
             return BLACK
-        if not self.valid_moves:
+        if self.no_valid_moves():
             return -1*self.active_player
         return 0
+    
+    def no_valid_moves(self):
+        for _,moves in self.valid_moves.items():
+            if len(moves) > 0: return False
+        return True
     
     def get_piece(self, x : int, y : int):
         return self.board[x][y]
@@ -190,6 +195,7 @@ class Board:
                     self.remove(marked_piece)
                 self.marked = []
                 self.get_valid_moves(self.active_player)
+                print(self.valid_moves)
             return True
         return False
 

@@ -1,5 +1,6 @@
 import PySide6
 from functools import partial
+import time
 
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
@@ -29,10 +30,18 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.game = game
+        self.open = True
 
-        self.setFixedSize(QSize(720, 640))
+        self.setFixedSize(QSize(720, 660))
 
-        main_layout = QHBoxLayout()
+        main_layout = QVBoxLayout()
+
+        self.banner = QLabel(self)
+        self.banner.setText("Hey")
+        self.banner.setFixedSize(720,20)
+        self.banner.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(self.banner)
+        
         self.board = GUIBoard(self,game)
         main_layout.addWidget(self.board)
 
@@ -44,6 +53,18 @@ class MainWindow(QMainWindow):
 
     def update(self):
         self.board.update()
+
+    def closeEvent(self, event):
+        self.open = False
+        print("I just got closed")
+        super().closeEvent(event)
+        
+
+    def await_inputs(self):
+        self.enable_tiles()
+        while not self.game.turn_over and self.open:
+            self.game.gui.processEvents()
+            time.sleep(0.01)
 
     @property
     def tiles(self):
