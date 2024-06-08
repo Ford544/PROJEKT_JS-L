@@ -73,7 +73,7 @@ class Board:
     def whites(self):
         counter = 0
         for piece in self.pieces:
-            if piece.is_white: counter += 1
+            if piece.color == WHITE: counter += 1
         return counter
     
     @property
@@ -161,7 +161,7 @@ class Board:
             if self.board[tile[0]][tile[1]] is not None:
                 previous = self.board[tile[0]][tile[1]]
             tile = (tile[0] + vector[0], tile[1] + vector[1])
-        #revursively look for further moves for all jumps
+        #recursively look for further moves for all jumps
         for jump,captured in zip(jumps,potential_jumped):
             further_moves = self.get_piece_moves(jump[0], jump[1], piece, jumped+[captured])
             moves.append(Move(steps=[jump],jumped=[captured]))
@@ -186,7 +186,6 @@ class Board:
                     piece.is_king = True
 
                 self.active_player *= -1
-                print(self.marked)
                 for marked_piece in self.marked:
                     self.remove(marked_piece)
                 self.marked = []

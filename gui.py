@@ -25,10 +25,6 @@ SELECTED_BROWN_TILE_COLOR = "#855843"
 
 class MainWindow(QMainWindow):
 
-    @property
-    def tiles(self):
-        return self.board.tiles
-
     def __init__(self,game):
         super().__init__()
 
@@ -49,13 +45,27 @@ class MainWindow(QMainWindow):
     def update(self):
         self.board.update()
 
+    @property
+    def tiles(self):
+        return self.board.tiles
+    
+    @property
+    def enable_tiles(self):
+        return self.board.enable_tiles
+    
+    @property
+    def disable_tiles(self):
+        return self.board.disable_tiles
+
 
 class GUIBoard(QFrame):
+
     def __init__(self, parent, game):
         super().__init__(parent)
         
         self.game = game
         self.tiles = []
+        self.tiles_enabled = False
 
         self.layout = QGridLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -74,8 +84,15 @@ class GUIBoard(QFrame):
                 self.layout.addWidget(square, row, col)
                 self.tiles[-1].append(square)
 
+    def enable_tiles(self):
+        self.tiles_enabled = True
+
+    def disable_tiles(self):
+        self.tiles_disabled = False
+
     def update(self):
         #draw pieces
+        print("updajtuje borda")
         for i in range(HEIGHT):
             for j in range(WIDTH):
                 contents = self.game.board.get_piece(i,j)
@@ -126,6 +143,11 @@ class Tile(QLabel):
 
     clicked = Signal()
 
+    x : int
+    y : int
+    marked : bool
+    valid_move : bool
+
     def __init__(self,parent, x, y):
         super().__init__(parent)
         self.content = EMPTY
@@ -170,7 +192,11 @@ class Tile(QLabel):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.clicked.emit()
+            #this is a simple way to disable tile clicking, but it's probably not the best one
+            #we may want some alternate event to happen when the disabled board is clicked after all
+            if self.parent().tiles_enabled:
+                self.clicked.emit()
+                
 
 class GUI:
 
@@ -192,5 +218,17 @@ class GUI:
 
     def update(self):
         self.window.update()
+
+    def processEvents(self):
+        self.app.processEvents()
+
+    @property
+    def enable_tiles(self):
+        return self.window.enable_tiles
+
+    @property
+    def disable_tiles(self):
+        return self.window.disable_tiles
+
 
         
