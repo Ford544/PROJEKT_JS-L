@@ -13,17 +13,16 @@ class Game:
     board : Board
     selected : Piece
     gui : GUI
-    player1 : Player
-    player2 : Player
-    active_player : int
+    white_player : Player
+    black_player : Player
     turn_over : bool
 
     def __init__(self):
        self.board = Board()
        self.selected = None
        self.gui = GUI()
-       self.player1 = HumanPlayer(self, "human")
-       self.player2 = RandomPlayer(self, "si")
+       self.white_player = HumanPlayer(self, "human")
+       self.black_player = RandomPlayer(self, "si")
        self.active_player = 1
        self.turn_over = False
        self.gui.init(self)
@@ -33,30 +32,32 @@ class Game:
 
 
     def run(self):
-        print("run")
         while self.board.winner == 0 and self.gui.window.open:
-            self.player1.make_move()
-            if self.turn_over:
-                self.player1,self.player2 = self.player2,self.player1
-                self.turn_over = False
+            print(self.board.active_player)
+            if self.board.active_player == WHITE:
+                self.gui.set_banner_text("WHITE'S TURN")
+                self.white_player.make_move()
+            else:
+                self.gui.set_banner_text("BLACK'S TURN")
+                self.black_player.make_move()
         if self.board.winner == BLACK:
-            print("Black has won!")
+            self.gui.set_banner_text("Black has won!")
         elif self.board.winner == WHITE:
-            print("White has won!")
+            self.gui.set_banner_text("White has won!")
         print("gello")
 
-    def run_turn(self):
-        print((self.active_player))
-        if self.turn_over:
-            if self.active_player == 1:
-                self.active_player = 2
-            else:
-                self.active_player = 1
-        self.turn_over = False
-        if self.active_player == 1:
-            self.player1.make_move()
-        else:
-            self.player2.make_move()
+    # def run_turn(self):
+    #     print((self.active_player))
+    #     if self.turn_over:
+    #         if self.active_player == 1:
+    #             self.active_player = 2
+    #         else:
+    #             self.active_player = 1
+    #     self.turn_over = False
+    #     if self.active_player == 1:
+    #         self.player1.make_move()
+    #     else:
+    #         self.player2.make_move()
             
 
     def select(self, x : int, y : int):

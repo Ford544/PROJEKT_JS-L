@@ -61,10 +61,15 @@ class MainWindow(QMainWindow):
         
 
     def await_inputs(self):
+        player = self.game.board.active_player
         self.enable_tiles()
-        while not self.game.turn_over and self.open:
+        while player == self.game.board.active_player and self.open:
             self.game.gui.processEvents()
             time.sleep(0.01)
+
+    def set_banner_text(self, text):
+        self.banner.setText(text)
+        self.update()
 
     @property
     def tiles(self):
@@ -250,6 +255,10 @@ class GUI:
     @property
     def disable_tiles(self):
         return self.window.disable_tiles
+    
+    @property
+    def set_banner_text(self):
+        return self.window.set_banner_text
 
 
         
