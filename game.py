@@ -33,7 +33,6 @@ class Game:
 
     def run(self):
         while self.board.winner == 0 and self.gui.window.open:
-            print(self.board.active_player)
             if self.board.active_player == WHITE:
                 self.gui.set_banner_text("WHITE'S TURN")
                 self.white_player.make_move()
@@ -44,7 +43,7 @@ class Game:
             self.gui.set_banner_text("Black has won!")
         elif self.board.winner == WHITE:
             self.gui.set_banner_text("White has won!")
-        print("gello")
+        self.gui.run()
 
     # def run_turn(self):
     #     print((self.active_player))
@@ -61,7 +60,6 @@ class Game:
             
 
     def select(self, x : int, y : int):
-        print("select")
         target = self.board.get_piece(x,y)
         if target is None:
             if self.selected is not None:
@@ -88,6 +86,7 @@ class Game:
     @property
     def selected_valid_moves(self):
         if self.selected is None: return []
+        if not self.selected in self.board.valid_moves.keys(): return []
         return [move.first_step for move in self.board.valid_moves[self.selected]]
     
     @property

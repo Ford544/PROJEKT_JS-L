@@ -61,11 +61,15 @@ class MainWindow(QMainWindow):
         
 
     def await_inputs(self):
+        #WTF is going on here
         player = self.game.board.active_player
+        self.game.gui.processEvents()
+        self.game.gui.processEvents()
         self.enable_tiles()
         while player == self.game.board.active_player and self.open:
             self.game.gui.processEvents()
             time.sleep(0.01)
+        self.disable_tiles()
 
     def set_banner_text(self, text):
         self.banner.setText(text)
@@ -111,14 +115,16 @@ class GUIBoard(QFrame):
                 self.tiles[-1].append(square)
 
     def enable_tiles(self):
+        if not self.tiles_enabled:
+            print("enabling tiles")
         self.tiles_enabled = True
 
     def disable_tiles(self):
-        self.tiles_disabled = False
+        print("disabling tiles")
+        self.tiles_enabled = False
 
     def update(self):
         #draw pieces
-        print("updajtuje borda")
         for i in range(HEIGHT):
             for j in range(WIDTH):
                 contents = self.game.board.get_piece(i,j)
@@ -220,6 +226,7 @@ class Tile(QLabel):
         if event.button() == Qt.LeftButton:
             #this is a simple way to disable tile clicking, but it's probably not the best one
             #we may want some alternate event to happen when the disabled board is clicked after all
+            print("click event")
             if self.parent().tiles_enabled:
                 self.clicked.emit()
                 
@@ -240,7 +247,8 @@ class GUI:
             print()
     
     def run(self):
-        self.app.exec()
+        if self.window.open:
+            self.app.exec()
 
     def update(self):
         self.window.update()

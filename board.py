@@ -195,7 +195,6 @@ class Board:
                     self.remove(marked_piece)
                 self.marked = []
                 self.get_valid_moves(self.active_player)
-                print(self.valid_moves)
             return True
         return False
 
