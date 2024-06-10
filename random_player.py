@@ -6,7 +6,7 @@ from player import Player
 
 class RandomPlayer(Player):
 
-    def make_move(self):
+    def pass_control(self) -> bool:
         valid_moves = []
         
         for piece,moves in self.game.board.valid_moves.items():
@@ -18,5 +18,6 @@ class RandomPlayer(Player):
         for x,y in move.steps:
             self.game.gui.processEvents()
             self.game.select(x,y)
-            time.sleep(0.25)
+            time.sleep(2)
+        return False
         

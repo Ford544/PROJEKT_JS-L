@@ -8,6 +8,7 @@ from PySide6.QtGui import QPainter, QPen, QColor
 
 import consts
 from consts import WIDTH,HEIGHT
+from game import Game
 
 #those are for display purposes and distinct from constants in consts.py, which are meant for logic
 EMPTY = 0
@@ -60,16 +61,16 @@ class MainWindow(QMainWindow):
         super().closeEvent(event)
         
 
-    def await_inputs(self):
-        #WTF is going on here
-        player = self.game.board.active_player
-        self.game.gui.processEvents()
-        self.game.gui.processEvents()
-        self.enable_tiles()
-        while player == self.game.board.active_player and self.open:
-            self.game.gui.processEvents()
-            time.sleep(0.01)
-        self.disable_tiles()
+    # def await_inputs(self):
+    #     #WTF is going on here
+    #     player = self.game.board.active_player
+    #     self.game.gui.processEvents()
+    #     self.game.gui.processEvents()
+    #     self.enable_tiles()
+    #     while player == self.game.board.active_player and self.open:
+    #         self.game.gui.processEvents()
+    #         time.sleep(0.01)
+    #     self.disable_tiles()
 
     def set_banner_text(self, text):
         self.banner.setText(text)
@@ -106,7 +107,7 @@ class GUIBoard(QFrame):
             self.tiles.append([])
             for col in range(WIDTH):
                 square = Tile(self,row,col)
-                square.clicked.connect(partial(game.select,row,col))
+                square.clicked.connect(partial(self.tile_click,row,col))
                 if row % 2 == col % 2:
                     square.setStyleSheet(f'background-color: {WHITE_TILE_COLOR}')
                 else:
@@ -114,7 +115,15 @@ class GUIBoard(QFrame):
                 self.layout.addWidget(square, row, col)
                 self.tiles[-1].append(square)
 
+    def tile_click(self,row,col):
+        self.disable_tiles()
+        self.game.select(row,col)
+        self.game.play()
+
+
     def enable_tiles(self):
+        self.game.gui.processEvents()
+        self.game.gui.processEvents()
         if not self.tiles_enabled:
             print("enabling tiles")
         self.tiles_enabled = True
@@ -224,27 +233,26 @@ class Tile(QLabel):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            #this is a simple way to disable tile clicking, but it's probably not the best one
-            #we may want some alternate event to happen when the disabled board is clicked after all
             print("click event")
+            print(self.parent().tiles_enabled)
             if self.parent().tiles_enabled:
                 self.clicked.emit()
                 
 
 class GUI:
 
-    def init(self,game):
-        self.app = QApplication([])
+    app : QApplication
+    window : MainWindow
 
-        self.window = MainWindow(game)
+    def init(self):
+        self.app = QApplication([])
+        self.game = Game(self)
+        self.window = MainWindow(self.game)
         self.window.show()
 
         self.window.update()
-
-        for row in self.window.tiles:
-            for cell in row:
-                print(cell.content,end="")
-            print()
+        self.game.play()
+        self.run()
     
     def run(self):
         if self.window.open:
@@ -269,4 +277,6 @@ class GUI:
         return self.window.set_banner_text
 
 
-        
+if __name__ == "__main__":
+    gui = GUI()
+    gui.init()

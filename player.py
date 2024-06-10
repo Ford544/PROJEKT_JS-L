@@ -10,5 +10,5 @@ class Player(ABC):
         self.name = name
 
     @abstractmethod
-    def make_move(self):
+    def pass_control(self) -> bool:
         pass

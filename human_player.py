@@ -3,6 +3,8 @@ import time
 from player import Player
 
 class HumanPlayer(Player):
-    def make_move(self):
+
+    def pass_control(self) -> bool:
         print("human makes move")
-        self.game.gui.window.await_inputs()
+        self.game.gui.enable_tiles()
+        return True
