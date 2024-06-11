@@ -5,11 +5,14 @@ from consts import *
 
 class Move:
 
+    steps : list[tuple[int]]
+    jumped : list[tuple[int]]
+
     def __init__(self, steps : list[tuple[int]] = [], jumped : list[tuple[int]] = []):
         self.steps = steps
         self.jumped = jumped
 
-    def pop(self):
+    def pop(self) -> bool:
         if len(self.steps) == 0:
             return False
         self.steps = self.steps[1:]
@@ -20,21 +23,21 @@ class Move:
         return True
     
     @property
-    def first_step(self):
+    def first_step(self) -> tuple[int] | None:
         if len(self.steps) == 0:
             return None
         return self.steps[0]
     
     @property
-    def first_jumped(self):
+    def first_jumped(self) -> tuple[int] | None:
         if len(self.jumped) == 0:
             return None
         return self.jumped[0]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Move object (steps={self.steps} jumped={self.jumped})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
     def __add__(self, o):
@@ -42,12 +45,16 @@ class Move:
 
 class Board:
 
+    board : list[list[Piece | None]]
     pieces : list[Piece]
     valid_moves : dict[Piece, list[Move]]
     active_player : int
     marked : list[tuple[int]]
 
     def __init__(self):
+        self.set_up()
+
+    def set_up(self) -> None:
         self.board = [[None for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
         self.pieces = []
         for row in range(BOARD_SIZE):
@@ -60,9 +67,9 @@ class Board:
         self.active_player = WHITE
         self.marked = []
 
-        self.get_valid_moves(self.active_player)
+        self.update_valid_moves(self.active_player)
 
-    def starting_location_piece(row : int, col : int):
+    def starting_location_piece(row : int, col : int) -> Piece | None:
         if row < FILLED_ROWS and row % 2 != col % 2:
             return Piece(row,col,WHITE)
         if row >= BOARD_SIZE - FILLED_ROWS and row % 2 != col % 2:
@@ -70,18 +77,18 @@ class Board:
         return None
     
     @property
-    def whites(self):
+    def whites(self) -> int:
         counter = 0
         for piece in self.pieces:
             if piece.color == WHITE: counter += 1
         return counter
     
     @property
-    def blacks(self):
+    def blacks(self) -> int:
         return len(self.pieces) - self.whites
     
     @property
-    def winner(self):
+    def winner(self) -> int:
         if self.blacks == 0:
             return WHITE
         if self.whites == 0:
@@ -90,15 +97,15 @@ class Board:
             return -1*self.active_player
         return 0
     
-    def no_valid_moves(self):
-        for _,moves in self.valid_moves.items():
+    def no_valid_moves(self) -> bool:
+        for moves in self.valid_moves.values():
             if len(moves) > 0: return False
         return True
     
-    def get_piece(self, x : int, y : int):
+    def get_piece(self, x : int, y : int) -> Piece | None:
         return self.board[x][y]
     
-    def get_valid_moves(self, turn : int):
+    def update_valid_moves(self, turn : int) -> None:
         longest_jump_length = 0
         
         for piece in self.pieces:
@@ -112,17 +119,17 @@ class Board:
         
         
     
-    def get_valid_piece_moves(self, piece : Piece):
+    def get_valid_piece_moves(self, piece : Piece) -> list[Move]:
         return self.get_piece_moves(piece.x,piece.y,piece,[])
 
-    def get_piece_moves(self, start_x : int, start_y : int, piece : Piece, jumped : list[tuple[int]]):
+    def get_piece_moves(self, start_x : int, start_y : int, piece : Piece, jumped : list[tuple[int]]) -> list[Move]:
         moves = []
         for vector in [(-1,-1),(-1,1),(1,-1),(1,1)]:
             moves = moves + self.check_diagonal(start_x,start_y,piece,vector,jumped)
         return moves
 
 
-    def check_diagonal(self, start_x : int, start_y : int, piece : Piece, vector : tuple[int], jumped : list[tuple[int]]):
+    def check_diagonal(self, start_x : int, start_y : int, piece : Piece, vector : tuple[int], jumped : list[tuple[int]]) -> list[Move]:
         moves = []
         jumps = []
         potential_jumped = []
@@ -175,12 +182,13 @@ class Board:
         
         return moves
     
-    def move(self, piece : Piece, x : int, y : int):
+    #return True if move was executed, and False if it wasn't (because it was invalid)
+    def move(self, piece : Piece, x : int, y : int) -> bool:
         if self.is_valid_move(piece, x, y):
             self.board[piece.x][piece.y] = None
             self.board[x][y] = piece
             piece.x, piece.y = x, y
-            self.update_valid_moves(piece, x, y)
+            self.prune_valid_moves(piece, x, y)
             #if the move sequence is over
             if self.valid_moves == {}:
 
@@ -194,16 +202,23 @@ class Board:
                 for marked_piece in self.marked:
                     self.remove(marked_piece)
                 self.marked = []
-                self.get_valid_moves(self.active_player)
+                self.update_valid_moves(self.active_player)
             return True
         return False
+    
+    def execute_full_move(self, piece : Piece, move : Move) -> None:
+        for x, y in move.steps:
+            self.move(piece, x, y)
 
-    def remove(self, coords : tuple[int]):
+
+    #remove piece at the coordinates
+    def remove(self, coords : tuple[int]) -> None:
         x,y = coords
-        self.pieces.remove(self.board[x][y])
+        if self.board[x][y] != None:
+            self.pieces.remove(self.board[x][y])
         self.board[x][y] = None 
 
-    def update_valid_moves(self, piece : Piece, x : int, y : int):
+    def prune_valid_moves(self, piece : Piece, x : int, y : int) -> None:
         new_moves = []
         for move in self.valid_moves[piece]:
             if move.first_step == (x,y):
@@ -216,7 +231,7 @@ class Board:
         if len(new_moves) > 0:
             self.valid_moves[piece] = new_moves
 
-    def is_valid_move(self, piece : Piece, x : int, y : int):
+    def is_valid_move(self, piece : Piece, x : int, y : int) -> bool:
         if piece not in self.valid_moves.keys():
             return False
         for move in self.valid_moves[piece]:
@@ -224,10 +239,10 @@ class Board:
                 return True
         return False
 
-    def is_valid_tile(self, x : int, y : int):
+    def is_valid_tile(self, x : int, y : int) -> bool:
         return (0 <= x < BOARD_SIZE) and (0 <= y < BOARD_SIZE)
     
-    def has_valid_moves(self, piece : Piece):
+    def has_valid_moves(self, piece : Piece) -> bool:
         return piece in self.valid_moves.keys() and len(self.valid_moves[piece]) > 0 
 
 #TESTING

@@ -1,4 +1,3 @@
-import PySide6
 from functools import partial
 import time
 
@@ -23,71 +22,6 @@ WHITE_TILE_COLOR = "#EEEEEE"
 SELECTED_WHITE_TILE_COLOR = "#AAAAAA"
 BROWN_TILE_COLOR = "#B58863"
 SELECTED_BROWN_TILE_COLOR = "#855843"
-
-
-class MainWindow(QMainWindow):
-
-    def __init__(self,game):
-        super().__init__()
-
-        self.game = game
-        self.open = True
-
-        self.setFixedSize(QSize(720, 660))
-
-        main_layout = QVBoxLayout()
-
-        self.banner = QLabel(self)
-        self.banner.setText("Hey")
-        self.banner.setFixedSize(720,20)
-        self.banner.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(self.banner)
-        
-        self.board = GUIBoard(self,game)
-        main_layout.addWidget(self.board)
-
-        self.setLayout(main_layout)
-
-        widget = QWidget()
-        widget.setLayout(main_layout)
-        self.setCentralWidget(widget)
-
-    def update(self):
-        self.board.update()
-
-    def closeEvent(self, event):
-        self.open = False
-        print("I just got closed")
-        super().closeEvent(event)
-        
-
-    # def await_inputs(self):
-    #     #WTF is going on here
-    #     player = self.game.board.active_player
-    #     self.game.gui.processEvents()
-    #     self.game.gui.processEvents()
-    #     self.enable_tiles()
-    #     while player == self.game.board.active_player and self.open:
-    #         self.game.gui.processEvents()
-    #         time.sleep(0.01)
-    #     self.disable_tiles()
-
-    def set_banner_text(self, text):
-        self.banner.setText(text)
-        self.update()
-
-    @property
-    def tiles(self):
-        return self.board.tiles
-    
-    @property
-    def enable_tiles(self):
-        return self.board.enable_tiles
-    
-    @property
-    def disable_tiles(self):
-        return self.board.disable_tiles
-
 
 class GUIBoard(QFrame):
 
@@ -179,6 +113,123 @@ class GUIBoard(QFrame):
                 tile.update()
 
 
+class MainWindow(QMainWindow):
+
+    open : bool
+    stack : QStackedWidget
+    start_button : QPushButton
+    reset_button : QPushButton
+    return_button : QPushButton
+    banner : QLabel
+    board : GUIBoard
+
+    def __init__(self,game):
+        super().__init__()
+
+        self.game = game
+        self.open = True
+
+        self.stack = QStackedWidget()
+
+        #self.setMinimumSize(QSize(760, 660))
+
+        self.stack.addWidget(self.make_main_menu())
+        self.stack.addWidget(self.make_game_view())
+        self.setCentralWidget(self.stack)
+
+    def make_main_menu(self):
+        main_layout = QHBoxLayout()
+        
+        button_layout = QVBoxLayout()
+
+        self.start_button = QPushButton("Quick start")
+        self.start_button.clicked.connect(self.quick_start_button_effect)
+        button_layout.addWidget(self.start_button)
+
+        main_layout.addStretch()
+        main_layout.addLayout(button_layout)
+        main_layout.addStretch()
+
+        widget = QWidget()
+        widget.setLayout(main_layout)
+        widget.setStyleSheet('background-color: #338888;')
+        return widget
+
+
+    def make_game_view(self):
+        main_layout = QVBoxLayout()
+
+        self.banner = QLabel(self)
+        self.banner.setText("Hey")
+        self.banner.setFixedSize(720,20)
+        self.banner.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(self.banner)
+
+        button_layout = QHBoxLayout()
+
+        self.reset_button = QPushButton("Reset")
+        self.reset_button.clicked.connect(self.reset_button_effect)
+        button_layout.addWidget(self.reset_button)
+
+        self.return_button = QPushButton("Return")
+        self.return_button.clicked.connect(self.return_button_effect)
+        button_layout.addWidget(self.return_button)
+
+        main_layout.addLayout(button_layout)
+        
+        self.board = GUIBoard(self,self.game)
+        main_layout.addWidget(self.board)
+
+        widget = QWidget()
+        widget.setMinimumSize(QSize(760, 660))
+        widget.setLayout(main_layout)
+        return widget
+
+    def update(self):
+        self.board.update()
+
+    def closeEvent(self, event):
+        self.open = False
+        print("I just got closed")
+        super().closeEvent(event)
+
+    def quick_start_button_effect(self):
+        self.stack.setCurrentIndex(1)
+        self.game.play()
+        
+    def reset_button_effect(self):
+        self.game.restart()
+        self.game.play()
+
+    def return_button_effect(self):
+        self.stack.setCurrentIndex(0)
+
+    # def await_inputs(self):
+    #     #WTF is going on here
+    #     player = self.game.board.active_player
+    #     self.game.gui.processEvents()
+    #     self.game.gui.processEvents()
+    #     self.enable_tiles()
+    #     while player == self.game.board.active_player and self.open:
+    #         self.game.gui.processEvents()
+    #         time.sleep(0.01)
+    #     self.disable_tiles()
+
+    def set_banner_text(self, text):
+        self.banner.setText(text)
+        self.update()
+
+    @property
+    def tiles(self):
+        return self.board.tiles
+    
+    @property
+    def enable_tiles(self):
+        return self.board.enable_tiles
+    
+    @property
+    def disable_tiles(self):
+        return self.board.disable_tiles
 
 class Tile(QLabel):
 
@@ -246,12 +297,13 @@ class GUI:
 
     def init(self):
         self.app = QApplication([])
+        self.app.setStyle('Fusion')
         self.game = Game(self)
         self.window = MainWindow(self.game)
         self.window.show()
 
         self.window.update()
-        self.game.play()
+        #self.game.play()
         self.run()
     
     def run(self):

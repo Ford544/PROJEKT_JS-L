@@ -18,6 +18,6 @@ class RandomPlayer(Player):
         for x,y in move.steps:
             self.game.gui.processEvents()
             self.game.select(x,y)
-            time.sleep(2)
+            time.sleep(0.25)
         return False
         

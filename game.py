@@ -6,6 +6,7 @@ from board import Board
 from player import Player
 from human_player import HumanPlayer
 from random_player import RandomPlayer
+from minimax_player import MinimaxPlayer
 from consts import BLACK,WHITE
 
 class Game:
@@ -23,7 +24,7 @@ class Game:
        #self.gui = GUI()
 
        self.white_player = HumanPlayer(self, "human")
-       self.black_player = RandomPlayer(self, "si")
+       self.black_player = MinimaxPlayer(self, "si", 4, False)
        self.active_player = 1
 
        # OLD ARCHITECTURE
@@ -46,6 +47,10 @@ class Game:
             self.gui.set_banner_text("Black has won!")
         elif self.board.winner == WHITE:
             self.gui.set_banner_text("White has won!")
+
+    def restart(self):
+        self.board.set_up()
+        self.selected = None
 
     # OLD ARCHITECTURE
     # def run(self):
