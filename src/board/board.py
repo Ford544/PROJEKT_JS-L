@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from piece import Piece
-from consts import *
+from .piece import Piece
+from ..consts import BLACK, WHITE, BOARD_SIZE, FILLED_ROWS, HEIGHT, WIDTH
 
 class Move:
 

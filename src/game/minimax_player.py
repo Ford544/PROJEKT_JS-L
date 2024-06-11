@@ -2,10 +2,10 @@ import copy
 import random
 import time
 
-from board import Board, Move
-from consts import WHITE, BLACK
-from piece import Piece
-from player import Player
+from ..board.board import Board, Move
+from ..consts import WHITE, BLACK
+from ..board.piece import Piece
+from .player import Player
 
 class MinimaxPlayer(Player):
 

@@ -1,13 +1,13 @@
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
-from piece import Piece
-from board import Board
-from player import Player
-from human_player import HumanPlayer
-from random_player import RandomPlayer
-from minimax_player import MinimaxPlayer
-from consts import BLACK,WHITE
+from ..board.piece import Piece
+from ..board.board import Board
+from .player import Player
+from .human_player import HumanPlayer
+from .random_player import RandomPlayer
+from .minimax_player import MinimaxPlayer
+from ..consts import BLACK,WHITE
 
 class Game:
     board : Board
@@ -24,7 +24,7 @@ class Game:
        #self.gui = GUI()
 
        self.white_player = HumanPlayer(self, "human")
-       self.black_player = MinimaxPlayer(self, "si", 4, False)
+       self.black_player = MinimaxPlayer(self, "si", 2, False)
        self.active_player = 1
 
        # OLD ARCHITECTURE

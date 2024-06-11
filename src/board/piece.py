@@ -1,4 +1,4 @@
-from consts import *
+from ..consts import WHITE, BLACK, BOARD_SIZE
 
 class Piece:
     x : int
