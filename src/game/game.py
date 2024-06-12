@@ -17,16 +17,18 @@ class Game:
     black_player : Player
     manager : ProfileManager
 
-    def __init__(self, gui, manager):
-       
-       self.board = Board(10, True)
+
+    def __init__(self, gui, manager : ProfileManager, size : int = 8, capturing_obligatory : bool = True, 
+                 player1_mode : int = -1, player1_name : str = "Player1", player2_mode : int = 2, 
+                 player2_name : str = "Player2"):
+        #player modes:
+        # -1 - human
+        # 0 - random ai
+        # n = 1,2,3,... - minimax with depth n
+       self.configure(size, capturing_obligatory, player1_mode, player1_name, player2_mode, player2_name)
        self.selected = None
        self.gui = gui
        self.manager = manager
-
-       self.white_player = HumanPlayer(self, "human")
-       self.black_player = MinimaxPlayer(self, "si", 2, False)
-       self.active_player = 1 
 
     def play(self):
         while self.board.winner == 0:
@@ -46,12 +48,28 @@ class Game:
             self.gui.set_banner_text("White has won!")
             self.register_game(self.white_player)
 
-    def restart(self):
+    def restart(self) -> None:
         self.board.set_up()
         self.selected = None
 
+    def configure(self, size : int, capturing_obligatory : bool, player1_mode : int, player1_name : str, player2_mode : str, player2_name : int) -> None:
+        self.board = Board(size, capturing_obligatory)
+        self.white_player = self.make_player(player1_mode, player1_name, True)
+        self.black_player = self.make_player(player2_mode, player2_name, False)
+        
+    def make_player(self, mode : int, name : str, white : bool) -> Player:
+       match mode:
+           case -1:
+               return HumanPlayer(self,name)
+           case 0:
+               return RandomPlayer(self,name)
+           case n:
+               return MinimaxPlayer(self, name, n, white)
+              
+
     def select(self, x : int, y : int):
         target = self.board.get_piece(x,y)
+        print(target)
         if target is None:
             if self.selected is not None:
                 if self.board.move(self.selected,x,y):

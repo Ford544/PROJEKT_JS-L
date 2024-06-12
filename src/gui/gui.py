@@ -6,7 +6,6 @@ from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 from PySide6.QtGui import QPainter, QPen, QColor
 
-from ..consts import WIDTH,HEIGHT
 from ..game.game import Game
 from ..profiles.profile_ import Profile
 from ..profiles.profile_manager import ProfileManager
@@ -58,7 +57,7 @@ class MainMenu(QFrame):
         self.setStyleSheet('background-color: #338888;')
 
     def quick_start_button_effect(self):
-        self.window.start_game()
+        self.window.quick_game()
 
     def profiles_button_effect(self):
         self.window.enter_profiles_menu()
@@ -300,7 +299,12 @@ class MainWindow(QMainWindow):
         self.manager.save()
         super().closeEvent(event)
 
-    def start_game(self):
+    def quick_game(self):
+        if self.manager.active_profile is None:
+            human_name = "Human"
+        else:
+            human_name = self.manager.active_profile.name
+        self.game_view.game.configure(8, True, 3, human_name, -1, "SI")
         self.stack.setCurrentWidget(self.game_view)
         self.game_view.game.play()
 

@@ -1,4 +1,4 @@
-from ..consts import WHITE, BLACK, BOARD_SIZE
+from ..consts import WHITE, BLACK
 
 class Piece:
     x : int
