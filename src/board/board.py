@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from .piece import Piece
-from ..consts import BLACK, WHITE, BOARD_SIZE, FILLED_ROWS, HEIGHT, WIDTH
+from ..consts import BLACK, WHITE
 
 class Move:
 
@@ -45,21 +45,34 @@ class Move:
 
 class Board:
 
+    size : int
+    #those two are currently redundand, as they always equal to size and each other
+    #they're kept for the sake of potential extendability (we may potentially want to add some strange
+    #rule variant with non-square board)
+    width : int
+    height : int
+    capturing_obligatory : bool
+
     board : list[list[Piece | None]]
     pieces : list[Piece]
     valid_moves : dict[Piece, list[Move]]
     active_player : int
     marked : list[tuple[int]]
 
-    def __init__(self):
+    def __init__(self, size, capturing_obligatory):
+        self.size = size
+        self.width = size
+        self.height = size
+        self.capturing_obligatory = capturing_obligatory
         self.set_up()
 
+
     def set_up(self) -> None:
-        self.board = [[None for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
+        self.board = [[None for _ in range(self.size)] for _ in range(self.size)]
         self.pieces = []
-        for row in range(BOARD_SIZE):
-            for col in range(BOARD_SIZE):
-                piece = Board.starting_location_piece(row,col)
+        for row in range(self.size):
+            for col in range(self.size):
+                piece = self.starting_location_piece(row,col)
                 if piece != None:
                     self.pieces.append(piece)
                     self.board[row][col] = piece
@@ -69,10 +82,10 @@ class Board:
 
         self.update_valid_moves(self.active_player)
 
-    def starting_location_piece(row : int, col : int) -> Piece | None:
-        if row < FILLED_ROWS and row % 2 != col % 2:
+    def starting_location_piece(self, row : int, col : int) -> Piece | None:
+        if row < self.size / 2 - 1 and row % 2 != col % 2:
             return Piece(row,col,WHITE)
-        if row >= BOARD_SIZE - FILLED_ROWS and row % 2 != col % 2:
+        if row >= self.size / 2 + 1 and row % 2 != col % 2:
             return Piece(row,col,BLACK)
         return None
     
@@ -114,8 +127,8 @@ class Board:
                 for move in self.valid_moves[piece]:
                     longest_jump_length = max(longest_jump_length,len(move.jumped))
         
-        #jumping is obligatory
-        self.valid_moves = {piece : list(filter(lambda move : len(move.jumped) == longest_jump_length, moves)) for piece, moves in self.valid_moves.items()}
+        if self.capturing_obligatory:
+            self.valid_moves = {piece : list(filter(lambda move : len(move.jumped) == longest_jump_length, moves)) for piece, moves in self.valid_moves.items()}
         
         
     
@@ -137,9 +150,9 @@ class Board:
         #get next tile on the diagonal
         tile = (start_x + vector[0],start_y + vector[1])
             #if out of bound, terminate
-        if tile[0] < 0 or tile[0] >= HEIGHT:
+        if tile[0] < 0 or tile[0] >= self.height:
             return moves
-        if tile[1] < 0 or tile[1] >= WIDTH:
+        if tile[1] < 0 or tile[1] >= self.width:
             return moves
         #only consider moving (without jumping) if didn't jump yet AND the vector goes forward or the piece is a king
         if jumped == [] and (vector[0] == piece.color or piece.is_king):
@@ -149,7 +162,7 @@ class Board:
                 moves.append(Move(steps=[tile]))
         previous = self.board[tile[0]][tile[1]]
         tile = (tile[0] + vector[0], tile[1] + vector[1])
-        while 0 <= tile[0] < HEIGHT and 0 <= tile[1] < WIDTH:
+        while 0 <= tile[0] < self.height and 0 <= tile[1] < self.width:
             #if we encountered a piece of our own color, we cannot move further
             if self.board[tile[0]][tile[1]] is not None and self.board[tile[0]][tile[1]].color == piece.color:
                 break
@@ -193,7 +206,7 @@ class Board:
             if self.valid_moves == {}:
 
                 #make king
-                if piece.color == WHITE and x == HEIGHT - 1:
+                if piece.color == WHITE and x == self.height - 1:
                     piece.is_king = True
                 if piece.color == BLACK and x == 0:
                     piece.is_king = True
@@ -240,7 +253,7 @@ class Board:
         return False
 
     def is_valid_tile(self, x : int, y : int) -> bool:
-        return (0 <= x < BOARD_SIZE) and (0 <= y < BOARD_SIZE)
+        return (0 <= x < self.height) and (0 <= y < self.width)
     
     def has_valid_moves(self, piece : Piece) -> bool:
         return piece in self.valid_moves.keys() and len(self.valid_moves[piece]) > 0 
@@ -248,8 +261,8 @@ class Board:
 #TESTING
 if __name__ == "__main__":
     b = Board()
-    for i in range(HEIGHT):
-        for j in range(WIDTH):
+    for i in range(b.height):
+        for j in range(b.width):
             b.board[i][j] = None
     b.board[0][1] = Piece(0,1,WHITE)
     b.board[0][1].is_king = True

@@ -4,7 +4,7 @@ from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 from PySide6.QtGui import QPainter, QPen, QColor
 
-from ..consts import HEIGHT, WIDTH, WHITE
+from ..consts import WHITE
 
 #those are for display purposes and distinct from constants in consts.py, which are meant for logic
 EMPTY = 0
@@ -34,9 +34,9 @@ class GUIBoard(QFrame):
         self.layout.setSpacing(0)
         self.setLayout(self.layout)
 
-        for row in range(HEIGHT):
+        for row in range(self.game.board.height):
             self.tiles.append([])
-            for col in range(WIDTH):
+            for col in range(self.game.board.width):
                 square = Tile(self,row,col)
                 square.clicked.connect(partial(self.tile_click,row,col))
                 if row % 2 == col % 2:
@@ -65,8 +65,8 @@ class GUIBoard(QFrame):
 
     def update(self):
         #draw pieces
-        for i in range(HEIGHT):
-            for j in range(WIDTH):
+        for i in range(self.game.board.height):
+            for j in range(self.game.board.width):
                 contents = self.game.board.get_piece(i,j)
                 tile = self.tiles[i][j]
                 #print(f"{i}:{j}: {contents}")

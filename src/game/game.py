@@ -19,7 +19,7 @@ class Game:
 
     def __init__(self, gui, manager):
        
-       self.board = Board()
+       self.board = Board(10, True)
        self.selected = None
        self.gui = gui
        self.manager = manager
