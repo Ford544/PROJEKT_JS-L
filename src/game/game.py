@@ -19,10 +19,10 @@ class Game:
 
 
     def __init__(self, gui, manager : ProfileManager, size : int = 8, capturing_obligatory : bool = True, 
-                 player1_mode : int = -1, player1_name : str = "Player1", player2_mode : int = 2, 
+                 player1_mode : int = -2, player1_name : str = "Player1", player2_mode : int = 2, 
                  player2_name : str = "Player2"):
         #player modes:
-        # -1 - human
+        # -2 - human
         # 0 - random ai
         # n = 1,2,3,... - minimax with depth n
        self.configure(size, capturing_obligatory, player1_mode, player1_name, player2_mode, player2_name)
@@ -59,7 +59,7 @@ class Game:
         
     def make_player(self, mode : int, name : str, white : bool) -> Player:
        match mode:
-           case -1:
+           case -2:
                return HumanPlayer(self,name)
            case 0:
                return RandomPlayer(self,name)

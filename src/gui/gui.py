@@ -14,10 +14,10 @@ from .gui_board import GUIBoard
 
 class MainMenu(QFrame):
 
-
     window : QMainWindow
 
-    start_button : QPushButton
+    quick_start_button : QPushButton
+    new_game_button : QPushButton
     profiles_button : QPushButton
 
     profile_name_banner : QLabel
@@ -33,10 +33,13 @@ class MainMenu(QFrame):
         button_layout = QVBoxLayout()
 
         button_layout.addStretch()
-        self.start_button = QPushButton("Quick start")
-        self.start_button.clicked.connect(self.quick_start_button_effect)
-        button_layout.addWidget(self.start_button)
-        button_layout.addStretch()
+        self.quick_start_button = QPushButton("Quick start")
+        self.quick_start_button.clicked.connect(self.quick_start_button_effect)
+        button_layout.addWidget(self.quick_start_button)
+
+        self.new_game_button = QPushButton("New game")
+        self.new_game_button.clicked.connect(self.new_game_button_effect)
+        button_layout.addWidget(self.new_game_button)
 
         self.profiles_button = QPushButton("Profiles")
         self.profiles_button.clicked.connect(self.profiles_button_effect)
@@ -61,6 +64,9 @@ class MainMenu(QFrame):
 
     def profiles_button_effect(self):
         self.window.enter_profiles_menu()
+
+    def new_game_button_effect(self):
+        self.window.enter_new_game_menu()
 
     def set_profile_name_message(self):
         if self.window.manager.active_profile is not None:
@@ -263,6 +269,135 @@ class ProfileManagerMenu(QFrame):
     def return_button_effect(self):
         self.window.go_to_menu()
 
+class NewGameMenu(QFrame):
+
+    window : QMainWindow
+
+    user1_name_input : QLineEdit
+    user1_radio_group : QButtonGroup
+    user2_name_input : QLineEdit
+    user2_radio_group : QButtonGroup
+    size_radio_group : QButtonGroup
+    capturing_obligatory_checkbox : QCheckBox
+
+    def __init__(self, parent, window : QMainWindow):
+
+        super().__init__(parent)
+        self.window = window
+
+        main_layout = QHBoxLayout()
+
+        menu_layout = QVBoxLayout()
+
+        user1_layout = QVBoxLayout()
+        user1_button_layout = QHBoxLayout()
+
+        self.user1_name_input = QLineEdit()
+        if window.manager.active_profile is not None:
+            human_name = window.manager.active_profile.name
+        else:
+            human_name = "Human"
+        self.user1_name_input.setText(human_name)
+        self.user1_radio_group = QButtonGroup()
+        human_radio = QRadioButton("Human")
+        self.user1_radio_group.addButton(human_radio)
+        self.user1_radio_group.setId(human_radio, -2)
+        user1_button_layout.addWidget(human_radio)
+        random_radio = QRadioButton("Random AI")
+        self.user1_radio_group.addButton(random_radio)
+        self.user1_radio_group.setId(random_radio, 0)
+        user1_button_layout.addWidget(random_radio)
+        weak_radio = QRadioButton("Weak AI")
+        self.user1_radio_group.addButton(weak_radio)
+        self.user1_radio_group.setId(weak_radio, 2)
+        user1_button_layout.addWidget(weak_radio)
+        strong_radio = QRadioButton("Strong AI")
+        self.user1_radio_group.addButton(strong_radio)
+        self.user1_radio_group.setId(strong_radio, 3)
+        user1_button_layout.addWidget(strong_radio)
+        human_radio.setChecked(True)
+        #checkbox for profile player?
+
+        user1_layout.addWidget(self.user1_name_input)
+        user1_layout.addLayout(user1_button_layout)
+
+        user2_layout = QVBoxLayout()
+        user2_button_layout = QHBoxLayout()
+
+        self.user2_name_input = QLineEdit()
+        self.user2_name_input.setText("AI")
+        self.user2_radio_group = QButtonGroup()
+        human_radio = QRadioButton("Human")
+        self.user2_radio_group.addButton(human_radio)
+        self.user2_radio_group.setId(human_radio, -2)
+        user2_button_layout.addWidget(human_radio)
+        random_radio = QRadioButton("Random AI")
+        self.user2_radio_group.addButton(random_radio)
+        self.user2_radio_group.setId(random_radio, 0)
+        user2_button_layout.addWidget(random_radio)
+        weak_radio = QRadioButton("Weak AI")
+        self.user2_radio_group.addButton(weak_radio)
+        self.user2_radio_group.setId(weak_radio, 2)
+        user2_button_layout.addWidget(weak_radio)
+        strong_radio = QRadioButton("Strong AI")
+        self.user2_radio_group.addButton(strong_radio)
+        self.user2_radio_group.setId(strong_radio, 3)
+        user2_button_layout.addWidget(strong_radio)
+        weak_radio.setChecked(True)
+        #checkbox for profile player?
+
+        user2_layout.addWidget(self.user2_name_input)
+        user2_layout.addLayout(user2_button_layout)
+
+        size_layout = QHBoxLayout()
+
+        self.size_radio_group = QButtonGroup()
+        size8_button = QRadioButton("8x8")
+        self.size_radio_group.addButton(size8_button)
+        self.size_radio_group.setId(size8_button, 8)
+        size_layout.addWidget(size8_button)
+        size10_button = QRadioButton("10x10")
+        self.size_radio_group.addButton(size10_button)
+        self.size_radio_group.setId(size10_button, 10)
+        size_layout.addWidget(size10_button)
+        size8_button.setChecked(True)
+
+        settings_layout = QVBoxLayout()
+        self.capturing_obligatory_checkbox = QCheckBox("Capturing obligatory")
+        self.capturing_obligatory_checkbox.setChecked(True)
+
+        settings_layout.addWidget(self.capturing_obligatory_checkbox)
+
+        start_button = QPushButton("Start game")
+        start_button.clicked.connect(self.start_button_effect)
+
+        menu_layout.addLayout(user1_layout)
+        menu_layout.addLayout(user2_layout)
+        menu_layout.addLayout(size_layout)
+        menu_layout.addLayout(settings_layout)
+        menu_layout.addWidget(start_button)
+
+        main_layout.addStretch(stretch=1)
+        main_layout.addLayout(menu_layout)
+        main_layout.addStretch(stretch=1)
+
+        self.setLayout(main_layout)
+
+    def start_button_effect(self) -> None:
+        if self.user1_name_input.text() == "":
+            return
+        if self.user2_name_input.text() == "":
+            return
+        self.window.start_game(self.size_radio_group.checkedId(), self.capturing_obligatory_checkbox.isChecked(),
+                              self.user1_radio_group.checkedId(),self.user1_name_input.text(),
+                              self.user2_radio_group.checkedId(),self.user2_name_input.text())
+        
+
+
+
+        
+
+        
             
 class MainWindow(QMainWindow):
 
@@ -270,6 +405,7 @@ class MainWindow(QMainWindow):
     main_menu : MainMenu
     game_view : GameView
     profile_menu : ProfileManagerMenu
+    new_game_menu : NewGameMenu
     manager : ProfileManager
     
     def __init__(self,game, manager):
@@ -288,6 +424,8 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(self.game_view)
         self.profile_menu = ProfileManagerMenu(self.stack, self, manager)
         self.stack.addWidget(self.profile_menu)
+        self.new_game_menu = NewGameMenu(self.stack, self)
+        self.stack.addWidget(self.new_game_menu)
 
         self.setCentralWidget(self.stack)
 
@@ -304,8 +442,13 @@ class MainWindow(QMainWindow):
             human_name = "Human"
         else:
             human_name = self.manager.active_profile.name
-        self.game_view.game.configure(8, True, 3, human_name, -1, "SI")
+        self.start_game(8, True, -2, human_name, 3, "SI")
+
+    def start_game(self, size : int, capturing_obligatory : bool, player1_mode : int, player1_name : str, 
+                  player2_mode : int, player2_name :str):
+        self.game_view.game.configure(size,capturing_obligatory,player1_mode,player1_name,player2_mode,player2_name)
         self.stack.setCurrentWidget(self.game_view)
+        self.game_view.board.set_up()
         self.game_view.game.play()
 
     def go_to_menu(self):
@@ -315,6 +458,13 @@ class MainWindow(QMainWindow):
     def enter_profiles_menu(self):
         self.profile_menu.load_data()
         self.stack.setCurrentWidget(self.profile_menu)
+
+    def enter_new_game_menu(self):
+        self.stack.setCurrentWidget(self.new_game_menu)
+
+    def configure(self, size : int, capturing_obligatory : bool, player1_mode : int, player1_name : str, 
+                  player2_mode : int, player2_name :str) -> None:
+        self.game_view.game.configure(size,capturing_obligatory,player1_mode,player1_name,player2_mode,player2_name)
 
     @property
     def tiles(self):

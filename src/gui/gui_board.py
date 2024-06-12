@@ -29,11 +29,20 @@ class GUIBoard(QFrame):
         self.tiles = []
         self.tiles_enabled = False
 
+        
         self.layout = QGridLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
         self.setLayout(self.layout)
 
+        self.set_up()
+
+    def set_up(self):
+        while self.layout.count():
+            child = self.layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+        self.tiles = []
         for row in range(self.game.board.height):
             self.tiles.append([])
             for col in range(self.game.board.width):
@@ -45,6 +54,7 @@ class GUIBoard(QFrame):
                     square.setStyleSheet(f'background-color: {BROWN_TILE_COLOR}')
                 self.layout.addWidget(square, row, col)
                 self.tiles[-1].append(square)
+        self.update()
 
     def tile_click(self,row,col):
         self.disable_tiles()
