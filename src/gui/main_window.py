@@ -6,6 +6,7 @@ from .main_menu import MainMenu
 from .game_view import GameView
 from .profile_manager_menu import ProfileManagerMenu
 from .new_game_menu import NewGameMenu
+from ..consts import MAXIMUM_CAPTURING_OBLIGATORY
 
 
 class MainWindow(QMainWindow):
@@ -52,11 +53,13 @@ class MainWindow(QMainWindow):
             human_name = "Human"
         else:
             human_name = self.manager.active_profile.name
-        self.start_game(8, True, -2, human_name, 3, "SI", 1)
+        self.start_game(8, True, MAXIMUM_CAPTURING_OBLIGATORY, True, False, -2, human_name, 3, "SI", 1)
 
-    def start_game(self, size : int, capturing_obligatory : bool, player1_mode : int, player1_name : str, 
-                  player2_mode : int, player2_name : str, profile_player : int) -> None:
-        self.game_view.game.configure(size,capturing_obligatory,player1_mode,player1_name,player2_mode,player2_name, profile_player)
+    def start_game(self, size : int, capturing_obligatory : int, pieces_capturing_backwards : bool, flying_kings : bool, 
+                 mid_jump_crowning : bool, player1_mode : int, player1_name : str, player2_mode : int, player2_name : str, 
+                 profile_player : int) -> None:
+        self.game_view.game.configure(size,capturing_obligatory,pieces_capturing_backwards,flying_kings,mid_jump_crowning,
+                                      player1_mode,player1_name,player2_mode,player2_name, profile_player)
         self.stack.setCurrentWidget(self.game_view)
         self.game_view.board.set_up()
         self.game_view.game.paused = False
@@ -72,11 +75,6 @@ class MainWindow(QMainWindow):
 
     def enter_new_game_menu(self) -> None:
         self.stack.setCurrentWidget(self.new_game_menu)
-
-    def configure(self, size : int, capturing_obligatory : bool, player1_mode : int, player1_name : str, 
-                  player2_mode : int, player2_name :str) -> None:
-        self.game_view.game.configure(size,capturing_obligatory,player1_mode,player1_name,player2_mode,player2_name)
-
     
     def enable_tiles(self):
         return self.game_view.enable_tiles()

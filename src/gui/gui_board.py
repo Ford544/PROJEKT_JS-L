@@ -82,8 +82,6 @@ class Tile(QLabel):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            print("click event")
-            print(self.parent().tiles_enabled)
             if self.parent().tiles_enabled:
                 self.clicked.emit()
 
@@ -137,12 +135,9 @@ class GUIBoard(QFrame):
     def enable_tiles(self) -> None:
         self.game.gui.processEvents()
         self.game.gui.processEvents()
-        if not self.tiles_enabled:
-            print("enabling tiles")
         self.tiles_enabled = True
 
     def disable_tiles(self) -> None:
-        print("disabling tiles")
         self.tiles_enabled = False
 
     def update(self) -> None:

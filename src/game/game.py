@@ -8,7 +8,7 @@ from .human_player import HumanPlayer
 from .random_player import RandomPlayer
 from .minimax_player import MinimaxPlayer
 from ..profiles.profile_manager import ProfileManager
-from ..consts import BLACK,WHITE
+from ..consts import BLACK,WHITE,MAXIMUM_CAPTURING_OBLIGATORY
 
 class Game:
 
@@ -19,9 +19,11 @@ class Game:
     manager : ProfileManager
     paused : bool
 
-    def __init__(self, gui, manager : ProfileManager, size : int = 8, capturing_obligatory : bool = True, 
-                 player1_mode : int = -2, player1_name : str = "Player1", player2_mode : int = 2, 
-                 player2_name : str = "Player2", profile_player : int = 1):
+    def __init__(self, gui, manager : ProfileManager, size : int = 8, 
+                 capturing_obligatory : int = MAXIMUM_CAPTURING_OBLIGATORY, pieces_capturing_backwards : bool = True, 
+                 flying_kings : bool = True, mid_jump_crowning : bool = False, player1_mode : int = -2, 
+                 player1_name : str = "Player1", player2_mode : int = 2, player2_name : str = "Player2", 
+                 profile_player : int = 1):
         #player modes:
         # -2 - human
         # 0 - random ai
@@ -31,7 +33,8 @@ class Game:
         #0 - neither
         #1 - white
         #2 - black
-       self.configure(size, capturing_obligatory, player1_mode, player1_name, player2_mode, player2_name, profile_player)
+       self.configure(size, capturing_obligatory, pieces_capturing_backwards, flying_kings, mid_jump_crowning, 
+                      player1_mode, player1_name, player2_mode, player2_name, profile_player)
        self.selected = None
        self.gui = gui
        self.manager = manager
@@ -59,9 +62,10 @@ class Game:
         self.board.set_up()
         self.selected = None
 
-    def configure(self, size : int, capturing_obligatory : bool, player1_mode : int, player1_name : str, 
-                  player2_mode : str, player2_name : int, profile_player : int) -> None:
-        self.board = Board(size, capturing_obligatory)
+    def configure(self, size : int, capturing_obligatory : int, pieces_capturing_backwards : bool, flying_kings : bool, 
+                mid_jump_crowning : bool, player1_mode : int, player1_name : str, player2_mode : str, 
+                player2_name : int, profile_player : int) -> None:
+        self.board = Board(size, capturing_obligatory, pieces_capturing_backwards, flying_kings, mid_jump_crowning)
         white_profile = False
         black_profile = False
         if profile_player == 1:
@@ -83,7 +87,6 @@ class Game:
 
     def select(self, x : int, y : int):
         target = self.board.get_piece(x,y)
-        print(target)
         if target is None:
             if self.selected is not None:
                 if self.board.move(self.selected,x,y):
@@ -92,11 +95,9 @@ class Game:
                     else:
                         self.mark_selected(None)
                     self.gui.update()
-                    print(f"moved to {(x,y)}")
 
         elif target.color == self.board.active_player:
             self.mark_selected(target)
-            print(f"selected {(x,y)}")
 
     def mark_selected(self, target : Piece) -> None:
         self.selected = target

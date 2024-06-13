@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from .piece import Piece
-from ..consts import BLACK, WHITE
+from ..consts import BLACK, WHITE, CAPTURING_OBLIGATORY, MAXIMUM_CAPTURING_OBLIGATORY
 
 class Move:
 
@@ -51,7 +51,10 @@ class Board:
     #rule variant with non-square board)
     width : int
     height : int
-    capturing_obligatory : bool
+    capturing_obligatory : int
+    pieces_capturing_backwards : bool
+    flying_kings : bool
+    mid_jump_crowning : bool
 
     board : list[list[Piece | None]]
     pieces : list[Piece]
@@ -59,11 +62,15 @@ class Board:
     active_player : int
     marked : list[tuple[int]]
 
-    def __init__(self, size, capturing_obligatory):
+    def __init__(self, size, capturing_obligatory : int, pieces_capturing_backwards : bool, flying_kings : bool, 
+                 mid_jump_crowning : bool):
         self.size = size
         self.width = size
         self.height = size
         self.capturing_obligatory = capturing_obligatory
+        self. pieces_capturing_backwards = pieces_capturing_backwards
+        self.flying_kings = flying_kings
+        self.mid_jump_crowning = mid_jump_crowning
         self.set_up()
 
 
@@ -127,22 +134,29 @@ class Board:
                 for move in self.valid_moves[piece]:
                     longest_jump_length = max(longest_jump_length,len(move.jumped))
         
-        if self.capturing_obligatory:
-            self.valid_moves = {piece : list(filter(lambda move : len(move.jumped) == longest_jump_length, moves)) for piece, moves in self.valid_moves.items()}
+        if self.capturing_obligatory == CAPTURING_OBLIGATORY:
+            if longest_jump_length > 0:
+                self.valid_moves = {piece : list(filter(lambda move : len(move.jumped) > 0, moves)) for piece, moves in self.valid_moves.items()}
         
+        elif self.capturing_obligatory == MAXIMUM_CAPTURING_OBLIGATORY:
+            self.valid_moves = {piece : list(filter(lambda move : len(move.jumped) == longest_jump_length, moves)) for piece, moves in self.valid_moves.items()}
         
     
     def get_valid_piece_moves(self, piece : Piece) -> list[Move]:
         return self.get_piece_moves(piece.x,piece.y,piece,[])
 
-    def get_piece_moves(self, start_x : int, start_y : int, piece : Piece, jumped : list[tuple[int]]) -> list[Move]:
+    def get_piece_moves(self, start_x : int, start_y : int, piece : Piece, jumped : list[tuple[int]], crowned : bool = False) -> list[Move]:
         moves = []
         for vector in [(-1,-1),(-1,1),(1,-1),(1,1)]:
-            moves = moves + self.check_diagonal(start_x,start_y,piece,vector,jumped)
+            moves = moves + self.check_diagonal(start_x,start_y,piece,vector,jumped, crowned)
         return moves
 
-
-    def check_diagonal(self, start_x : int, start_y : int, piece : Piece, vector : tuple[int], jumped : list[tuple[int]]) -> list[Move]:
+    def check_diagonal(self, start_x : int, start_y : int, piece : Piece, vector : tuple[int], jumped : list[tuple[int]], crowned : bool) -> list[Move]:
+        if crowned:
+            print("I got passed the crowned flag!")
+        #NOTE: the piece can be crowned because it's already a king, OR because it's going to become one on this branch
+        #of the move tree (in which case it was passed to the recursive call)
+        if piece.is_king: crowned = True      
         moves = []
         jumps = []
         potential_jumped = []
@@ -154,8 +168,13 @@ class Board:
             return moves
         if tile[1] < 0 or tile[1] >= self.width:
             return moves
+        
+        #if regular pieces can only capture forwards, then we immediately terminate for non-kings with backwards vectors
+        if vector[0] == -1*piece.color and not crowned and not self.pieces_capturing_backwards:
+            return moves
+        
         #only consider moving (without jumping) if didn't jump yet AND the vector goes forward or the piece is a king
-        if jumped == [] and (vector[0] == piece.color or piece.is_king):
+        if jumped == [] and (vector[0] == piece.color or crowned):
             #if the tile's empty, move is possible 
             #the second condition is because it should be possible to return to the same spot
             if (self.board[tile[0]][tile[1]] is None) or (tile == (piece.x,piece.y)):
@@ -169,8 +188,8 @@ class Board:
             #if we jumped already in this iteration, encountering another piece ends the iteration
             if previous is not None and self.board[tile[0]][tile[1]] is not None:
                 break
-            #a king can move to further empty tiles
-            if (jumped == []) and (previous is None) and (piece.is_king) and (self.board[tile[0]][tile[1]] is None or (tile == (piece.x,piece.y))):
+            #a flying king can move to further empty tiles
+            if (jumped == []) and (previous is None) and (crowned and self.flying_kings) and (self.board[tile[0]][tile[1]] is None or (tile == (piece.x,piece.y))):
                 moves.append(Move(steps=[tile]))
             #jumping
             #there must have been an enemy piece before; whether the piece is a king
@@ -179,8 +198,8 @@ class Board:
             if (previous is not None) and (previous.color != piece.color) and (self.board[tile[0]][tile[1]] is None or tile == (piece.x,piece.y)) and ((previous.x,previous.y) not in jumped):
                 jumps.append(tile)
                 potential_jumped.append((previous.x, previous.y))
-            #if not king, we need not consider tiles further away than two
-            if not piece.is_king:
+            #if not a flying king, we need not consider tiles further away than two
+            if not (crowned and self.flying_kings):
                 break
             #update previous and tile
             if self.board[tile[0]][tile[1]] is not None:
@@ -188,7 +207,12 @@ class Board:
             tile = (tile[0] + vector[0], tile[1] + vector[1])
         #recursively look for further moves for all jumps
         for jump,captured in zip(jumps,potential_jumped):
-            further_moves = self.get_piece_moves(jump[0], jump[1], piece, jumped+[captured])
+            if self.mid_jump_crowning and self.check_crowning(piece,jump[0]):
+                print("future crowning: ", jump)
+                future_crowning = True
+            else:
+                future_crowning = False
+            further_moves = self.get_piece_moves(jump[0], jump[1], piece, jumped+[captured], future_crowning)
             moves.append(Move(steps=[jump],jumped=[captured]))
             for further_move in further_moves:
                 moves.append(Move(steps=[jump],jumped=[captured]) + further_move)
@@ -201,14 +225,14 @@ class Board:
             self.board[piece.x][piece.y] = None
             self.board[x][y] = piece
             piece.x, piece.y = x, y
+            if self.mid_jump_crowning:
+                if self.check_crowning(piece):
+                    piece.is_king = True
             self.prune_valid_moves(piece, x, y)
             #if the move sequence is over
             if self.valid_moves == {}:
 
-                #make king
-                if piece.color == WHITE and x == self.height - 1:
-                    piece.is_king = True
-                if piece.color == BLACK and x == 0:
+                if self.check_crowning(piece):
                     piece.is_king = True
 
                 self.active_player *= -1
@@ -219,10 +243,18 @@ class Board:
             return True
         return False
     
+    #should a piece be crowned if it's in x'th row
+    def check_crowning(self, piece : Piece, x : int = -1) -> bool:
+        if x == -1: x = piece.x
+        if piece.color == WHITE and x == self.height - 1:
+            return True
+        if piece.color == BLACK and x == 0:
+            return True
+        return False
+    
     def execute_full_move(self, piece : Piece, move : Move) -> None:
         for x, y in move.steps:
             self.move(piece, x, y)
-
 
     #remove piece at the coordinates
     def remove(self, coords : tuple[int]) -> None:
@@ -257,14 +289,3 @@ class Board:
     
     def has_valid_moves(self, piece : Piece) -> bool:
         return piece in self.valid_moves.keys() and len(self.valid_moves[piece]) > 0 
-
-#TESTING
-if __name__ == "__main__":
-    b = Board()
-    for i in range(b.height):
-        for j in range(b.width):
-            b.board[i][j] = None
-    b.board[0][1] = Piece(0,1,WHITE)
-    b.board[0][1].is_king = True
-    b.board[3][4] = Piece(3,4,BLACK)
-    b.board[5][4] = Piece(5,4,BLACK)

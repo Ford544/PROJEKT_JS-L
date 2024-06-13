@@ -1,6 +1,8 @@
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 
+from ..consts import CAPTURING_OPTIONAL, CAPTURING_OBLIGATORY, MAXIMUM_CAPTURING_OBLIGATORY, BRAZILIAN, POLISH, AMERICAN, CANADIAN, RUSSIAN
+
 
 class NewGameMenu(QFrame):
 
@@ -10,9 +12,14 @@ class NewGameMenu(QFrame):
     user1_radio_group : QButtonGroup
     user2_name_input : QLineEdit
     user2_radio_group : QButtonGroup
+    ruleset_radio_group : QButtonGroup
     size_radio_group : QButtonGroup
-    capturing_obligatory_checkbox : QCheckBox
+    capturing_obligatory_radio_group : QButtonGroup
     profile_player_radio_group  : QButtonGroup
+    pieces_capturing_backwards_checkbox : QCheckBox
+    flying_kings_checkbox : QCheckBox
+    mid_jump_crowning_checkbox : QCheckBox
+
 
     def __init__(self, parent, window : QMainWindow):
 
@@ -105,6 +112,34 @@ class NewGameMenu(QFrame):
         self.user1_radio_group.buttonToggled.connect(self.player_mode_change)
         self.user2_radio_group.buttonToggled.connect(self.player_mode_change)
 
+        self.ruleset_radio_group = QButtonGroup()
+        ruleset_layout = QHBoxLayout()
+        brazilian_ruleset_radio = QRadioButton("Brazilian")
+        self.ruleset_radio_group.addButton(brazilian_ruleset_radio)
+        self.ruleset_radio_group.setId(brazilian_ruleset_radio, BRAZILIAN)
+        ruleset_layout.addWidget(brazilian_ruleset_radio)
+        polish_ruleset_radio = QRadioButton("Polish/International")
+        self.ruleset_radio_group.addButton(polish_ruleset_radio)
+        self.ruleset_radio_group.setId(polish_ruleset_radio, POLISH)
+        ruleset_layout.addWidget(polish_ruleset_radio)
+        american_ruleset_radio = QRadioButton("American/English")
+        self.ruleset_radio_group.addButton(american_ruleset_radio)
+        self.ruleset_radio_group.setId(american_ruleset_radio, AMERICAN)
+        ruleset_layout.addWidget(american_ruleset_radio)
+        canadian_ruleset_radio = QRadioButton("Canadian")
+        self.ruleset_radio_group.addButton(canadian_ruleset_radio)
+        self.ruleset_radio_group.setId(canadian_ruleset_radio, CANADIAN)
+        ruleset_layout.addWidget(canadian_ruleset_radio)
+        russian_ruleset_radio = QRadioButton("Russian")
+        self.ruleset_radio_group.addButton(russian_ruleset_radio)
+        self.ruleset_radio_group.setId(russian_ruleset_radio, RUSSIAN)
+        ruleset_layout.addWidget(russian_ruleset_radio)
+        # custom_ruleset_radio = QRadioButton("Custom")
+        # self.ruleset_radio_group.addButton(custom_ruleset_radio)
+        # self.ruleset_radio_group.setId(custom_ruleset_radio, RUSSIAN)
+        # ruleset_layout.addWidget(custom_ruleset_radio)
+        self.ruleset_radio_group.buttonToggled.connect(self.ruleset_change)
+
         size_layout = QHBoxLayout()
 
         self.size_radio_group = QButtonGroup()
@@ -116,13 +151,43 @@ class NewGameMenu(QFrame):
         self.size_radio_group.addButton(size10_button)
         self.size_radio_group.setId(size10_button, 10)
         size_layout.addWidget(size10_button)
+        size12_button = QRadioButton("12x12")
+        self.size_radio_group.addButton(size12_button)
+        self.size_radio_group.setId(size12_button, 12)
+        size_layout.addWidget(size12_button)
         size8_button.setChecked(True)
 
         settings_layout = QVBoxLayout()
-        self.capturing_obligatory_checkbox = QCheckBox("Capturing obligatory")
-        self.capturing_obligatory_checkbox.setChecked(True)
 
-        settings_layout.addWidget(self.capturing_obligatory_checkbox)
+        self.capturing_obligatory_radio_group = QButtonGroup()
+        capturing_optional_radio = QRadioButton("Capturing optional")
+        self.capturing_obligatory_radio_group.addButton(capturing_optional_radio)
+        self.capturing_obligatory_radio_group.setId(capturing_optional_radio, CAPTURING_OPTIONAL)
+        capturing_obligatory_radio = QRadioButton("Capturing obligatory")
+        self.capturing_obligatory_radio_group.addButton(capturing_obligatory_radio)
+        self.capturing_obligatory_radio_group.setId(capturing_obligatory_radio, CAPTURING_OBLIGATORY)
+        maximum_capturing_obligatory_radio = QRadioButton("Maximum capturing obligatory")
+        self.capturing_obligatory_radio_group.addButton(maximum_capturing_obligatory_radio)
+        self.capturing_obligatory_radio_group.setId(maximum_capturing_obligatory_radio,MAXIMUM_CAPTURING_OBLIGATORY)
+        maximum_capturing_obligatory_radio.setChecked(True)
+
+        capturing_obligatory_layout = QHBoxLayout()
+        capturing_obligatory_layout.addWidget(capturing_optional_radio)
+        capturing_obligatory_layout.addWidget(capturing_obligatory_radio)
+        capturing_obligatory_layout.addWidget(maximum_capturing_obligatory_radio)
+
+        self.pieces_capturing_backwards_checkbox = QCheckBox("Pieces capturing backwards")
+
+        self.flying_kings_checkbox = QCheckBox("Flying kings")
+
+        self.mid_jump_crowning_checkbox = QCheckBox("Mid-jump crowning")
+
+        settings_layout.addLayout(capturing_obligatory_layout)
+        settings_layout.addWidget(self.pieces_capturing_backwards_checkbox)
+        settings_layout.addWidget(self.flying_kings_checkbox)
+        settings_layout.addWidget(self.mid_jump_crowning_checkbox)
+
+        brazilian_ruleset_radio.setChecked(True)
 
         start_button = QPushButton("Start game")
         start_button.clicked.connect(self.start_button_effect)
@@ -130,6 +195,7 @@ class NewGameMenu(QFrame):
         menu_layout.addWidget(neither_profile_radio)
         menu_layout.addLayout(user1_layout)
         menu_layout.addLayout(user2_layout)
+        menu_layout.addLayout(ruleset_layout)
         menu_layout.addLayout(size_layout)
         menu_layout.addLayout(settings_layout)
         menu_layout.addWidget(start_button)
@@ -145,10 +211,12 @@ class NewGameMenu(QFrame):
             return
         if self.user2_name_input.text() == "":
             return
-        self.window.start_game(self.size_radio_group.checkedId(), self.capturing_obligatory_checkbox.isChecked(),
-                              self.user1_radio_group.checkedId(),self.user1_name_input.text(),
-                              self.user2_radio_group.checkedId(),self.user2_name_input.text(), 
-                              self.profile_player_radio_group.checkedId())
+        self.window.start_game(self.size_radio_group.checkedId(), self.capturing_obligatory_radio_group.checkedId(), 
+                               self.pieces_capturing_backwards_checkbox.isChecked(), 
+                               self.flying_kings_checkbox.isChecked(), self.mid_jump_crowning_checkbox.isChecked(), 
+                               self.user1_radio_group.checkedId(), self.user1_name_input.text(), 
+                               self.user2_radio_group.checkedId(),self.user2_name_input.text(), 
+                               self.profile_player_radio_group.checkedId())
         
     def player_mode_change(self) -> None:
         user1_mode = self.user1_radio_group.checkedId()
@@ -169,3 +237,38 @@ class NewGameMenu(QFrame):
             self.profile_player_radio_group.button(1).setChecked(True)
             self.profile_player_radio_group.button(1).setHidden(False)
             self.profile_player_radio_group.button(2).setHidden(False)
+
+    def ruleset_change(self):
+        ruleset = self.ruleset_radio_group.checkedId()
+        if ruleset == BRAZILIAN:
+            self.size_radio_group.button(8).click()
+            self.capturing_obligatory_radio_group.button(MAXIMUM_CAPTURING_OBLIGATORY).setChecked(True)
+            self.pieces_capturing_backwards_checkbox.setChecked(True)
+            self.flying_kings_checkbox.setChecked(True)
+            self.mid_jump_crowning_checkbox.setChecked(False)
+        elif ruleset == POLISH:
+            self.size_radio_group.button(10).click()
+            self.capturing_obligatory_radio_group.button(MAXIMUM_CAPTURING_OBLIGATORY).setChecked(True)
+            self.pieces_capturing_backwards_checkbox.setChecked(True)
+            self.flying_kings_checkbox.setChecked(True)
+            self.mid_jump_crowning_checkbox.setChecked(False)
+        elif ruleset == AMERICAN:
+            self.size_radio_group.button(8).click()
+            self.capturing_obligatory_radio_group.button(CAPTURING_OBLIGATORY).setChecked(True)
+            self.pieces_capturing_backwards_checkbox.setChecked(False)
+            self.flying_kings_checkbox.setChecked(False)
+            self.mid_jump_crowning_checkbox.setChecked(False)
+        elif ruleset == CANADIAN:
+            self.size_radio_group.button(12).click()
+            self.capturing_obligatory_radio_group.button(MAXIMUM_CAPTURING_OBLIGATORY).setChecked(True)
+            self.pieces_capturing_backwards_checkbox.setChecked(True)
+            self.flying_kings_checkbox.setChecked(True)
+            self.mid_jump_crowning_checkbox.setChecked(False)
+        elif ruleset == RUSSIAN:
+            self.size_radio_group.button(8).click()
+            self.capturing_obligatory_radio_group.button(CAPTURING_OBLIGATORY).setChecked(True)
+            self.pieces_capturing_backwards_checkbox.setChecked(True)
+            self.flying_kings_checkbox.setChecked(True)
+            self.mid_jump_crowning_checkbox.setChecked(True)
+
+
