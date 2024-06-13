@@ -12,8 +12,8 @@ class MinimaxPlayer(Player):
     depth : int
     white : bool
 
-    def __init__(self, game, name : str, depth : int, white : bool):
-        super().__init__(game,name)
+    def __init__(self, game, name : str, profile : bool, depth : int, white : bool):
+        super().__init__(game,name, profile)
         self.depth = depth
         self.white = white
 

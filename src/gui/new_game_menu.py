@@ -12,6 +12,7 @@ class NewGameMenu(QFrame):
     user2_radio_group : QButtonGroup
     size_radio_group : QButtonGroup
     capturing_obligatory_checkbox : QCheckBox
+    profile_player_radio_group  : QButtonGroup
 
     def __init__(self, parent, window : QMainWindow):
 
@@ -24,6 +25,13 @@ class NewGameMenu(QFrame):
 
         user1_layout = QVBoxLayout()
         user1_button_layout = QHBoxLayout()
+
+        self.profile_player_radio_group = QButtonGroup()
+        #this isn't mean to be visible, it only serves as the third option for profile player radio group
+        neither_profile_radio = QRadioButton()
+        self.profile_player_radio_group.addButton(neither_profile_radio)
+        self.profile_player_radio_group.setId(neither_profile_radio,0)
+        neither_profile_radio.setHidden(True)
 
         self.user1_name_input = QLineEdit()
         if window.manager.active_profile is not None:
@@ -50,9 +58,14 @@ class NewGameMenu(QFrame):
         user1_button_layout.addWidget(strong_radio)
         human_radio.setChecked(True)
         #checkbox for profile player?
+        user1_profile_radio = QRadioButton("Profile player")
+        self.profile_player_radio_group.addButton(user1_profile_radio)
+        self.profile_player_radio_group.setId(user1_profile_radio,1)
+        user1_profile_radio.setHidden(True)
 
         user1_layout.addWidget(self.user1_name_input)
         user1_layout.addLayout(user1_button_layout)
+        user1_layout.addWidget(user1_profile_radio)
 
         user2_layout = QVBoxLayout()
         user2_button_layout = QHBoxLayout()
@@ -78,9 +91,19 @@ class NewGameMenu(QFrame):
         user2_button_layout.addWidget(strong_radio)
         weak_radio.setChecked(True)
         #checkbox for profile player?
+        user2_profile_radio = QRadioButton("Profile player")
+        self.profile_player_radio_group.addButton(user2_profile_radio)
+        self.profile_player_radio_group.setId(user2_profile_radio,2)
+        user2_profile_radio.setHidden(True)
+
+        user1_profile_radio.setChecked(True)
 
         user2_layout.addWidget(self.user2_name_input)
         user2_layout.addLayout(user2_button_layout)
+        user2_layout.addWidget(user2_profile_radio)
+
+        self.user1_radio_group.buttonToggled.connect(self.player_mode_change)
+        self.user2_radio_group.buttonToggled.connect(self.player_mode_change)
 
         size_layout = QHBoxLayout()
 
@@ -104,6 +127,7 @@ class NewGameMenu(QFrame):
         start_button = QPushButton("Start game")
         start_button.clicked.connect(self.start_button_effect)
 
+        menu_layout.addWidget(neither_profile_radio)
         menu_layout.addLayout(user1_layout)
         menu_layout.addLayout(user2_layout)
         menu_layout.addLayout(size_layout)
@@ -123,4 +147,25 @@ class NewGameMenu(QFrame):
             return
         self.window.start_game(self.size_radio_group.checkedId(), self.capturing_obligatory_checkbox.isChecked(),
                               self.user1_radio_group.checkedId(),self.user1_name_input.text(),
-                              self.user2_radio_group.checkedId(),self.user2_name_input.text())
+                              self.user2_radio_group.checkedId(),self.user2_name_input.text(), 
+                              self.profile_player_radio_group.checkedId())
+        
+    def player_mode_change(self) -> None:
+        user1_mode = self.user1_radio_group.checkedId()
+        user2_mode = self.user2_radio_group.checkedId()
+        if user1_mode >= 0 and user2_mode >= 0:
+            self.profile_player_radio_group.button(0).setChecked(True)
+            self.profile_player_radio_group.button(1).setHidden(True)
+            self.profile_player_radio_group.button(2).setHidden(True)
+        if user1_mode == -2 and user2_mode >= 0:
+            self.profile_player_radio_group.button(1).setChecked(True)
+            self.profile_player_radio_group.button(1).setHidden(True)
+            self.profile_player_radio_group.button(2).setHidden(True)
+        if user1_mode >= 0 and user2_mode == -2:
+            self.profile_player_radio_group.button(2).setChecked(True)
+            self.profile_player_radio_group.button(1).setHidden(True)
+            self.profile_player_radio_group.button(2).setHidden(True)
+        if user1_mode == -2 and user2_mode == -2:
+            self.profile_player_radio_group.button(1).setChecked(True)
+            self.profile_player_radio_group.button(1).setHidden(False)
+            self.profile_player_radio_group.button(2).setHidden(False)

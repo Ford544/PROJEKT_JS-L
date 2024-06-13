@@ -21,12 +21,17 @@ class Game:
 
     def __init__(self, gui, manager : ProfileManager, size : int = 8, capturing_obligatory : bool = True, 
                  player1_mode : int = -2, player1_name : str = "Player1", player2_mode : int = 2, 
-                 player2_name : str = "Player2"):
+                 player2_name : str = "Player2", profile_player : int = 1):
         #player modes:
         # -2 - human
         # 0 - random ai
         # n = 1,2,3,... - minimax with depth n
-       self.configure(size, capturing_obligatory, player1_mode, player1_name, player2_mode, player2_name)
+
+        #profile player:
+        #0 - neither
+        #1 - white
+        #2 - black
+       self.configure(size, capturing_obligatory, player1_mode, player1_name, player2_mode, player2_name, profile_player)
        self.selected = None
        self.gui = gui
        self.manager = manager
@@ -54,19 +59,26 @@ class Game:
         self.board.set_up()
         self.selected = None
 
-    def configure(self, size : int, capturing_obligatory : bool, player1_mode : int, player1_name : str, player2_mode : str, player2_name : int) -> None:
+    def configure(self, size : int, capturing_obligatory : bool, player1_mode : int, player1_name : str, 
+                  player2_mode : str, player2_name : int, profile_player : int) -> None:
         self.board = Board(size, capturing_obligatory)
-        self.white_player = self.make_player(player1_mode, player1_name, True)
-        self.black_player = self.make_player(player2_mode, player2_name, False)
+        white_profile = False
+        black_profile = False
+        if profile_player == 1:
+            white_profile = True
+        if profile_player == 2:
+            black_profile = True
+        self.white_player = self.make_player(player1_mode, player1_name, white_profile, True)
+        self.black_player = self.make_player(player2_mode, player2_name, black_profile, False)
         
-    def make_player(self, mode : int, name : str, white : bool) -> Player:
+    def make_player(self, mode : int, name : str, profile : bool, white : bool) -> Player:
        match mode:
            case -2:
-               return HumanPlayer(self,name)
+               return HumanPlayer(self,name, profile)
            case 0:
-               return RandomPlayer(self,name)
+               return RandomPlayer(self,name, profile)
            case n:
-               return MinimaxPlayer(self, name, n, white)
+               return MinimaxPlayer(self, name, profile, n, white)
               
 
     def select(self, x : int, y : int):
@@ -90,8 +102,8 @@ class Game:
         self.selected = target
         self.gui.update()
 
-    def register_game(self, player : Player) -> None:
-        if isinstance(player,HumanPlayer):
+    def register_game(self, winner : Player) -> None:
+        if winner.profile:
             self.manager.register_win()
         else:
             self.manager.register_loss()

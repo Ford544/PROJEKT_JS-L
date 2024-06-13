@@ -14,7 +14,6 @@ class RandomPlayer(Player):
                 valid_moves.append((piece,move))
         piece,move = random.choice(valid_moves)
         self.game.select(piece.x, piece.y)
-        # input()
         for x,y in move.steps:
             self.game.gui.processEvents()
             self.game.select(x,y)
