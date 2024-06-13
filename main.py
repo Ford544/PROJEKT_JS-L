@@ -1,4 +1,6 @@
 from src.gui.gui import GUI
 
-gui = GUI()
-gui.init()
+if __name__ == "__main__":
+
+    gui = GUI()
+    gui.init()

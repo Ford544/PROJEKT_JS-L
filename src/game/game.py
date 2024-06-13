@@ -11,12 +11,13 @@ from ..profiles.profile_manager import ProfileManager
 from ..consts import BLACK,WHITE
 
 class Game:
+
     board : Board
     selected : Piece
     white_player : Player
     black_player : Player
     manager : ProfileManager
-
+    paused : bool
 
     def __init__(self, gui, manager : ProfileManager, size : int = 8, capturing_obligatory : bool = True, 
                  player1_mode : int = -2, player1_name : str = "Player1", player2_mode : int = 2, 
@@ -29,9 +30,10 @@ class Game:
        self.selected = None
        self.gui = gui
        self.manager = manager
+       self.paused = False
 
-    def play(self):
-        while self.board.winner == 0:
+    def play(self): 
+        while self.board.winner == 0 and not self.paused:
             if self.board.active_player == WHITE:
                 self.gui.set_banner_text("WHITE'S TURN")
                 if self.white_player.pass_control():

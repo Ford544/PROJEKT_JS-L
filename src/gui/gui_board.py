@@ -5,6 +5,7 @@ from PySide6.QtCore import *
 from PySide6.QtGui import QPainter, QPen, QColor
 
 from ..consts import WHITE
+from ..game.game import Game
 
 #those are for display purposes and distinct from constants in consts.py, which are meant for logic
 EMPTY = 0
@@ -19,105 +20,6 @@ WHITE_TILE_COLOR = "#EEEEEE"
 SELECTED_WHITE_TILE_COLOR = "#AAAAAA"
 BROWN_TILE_COLOR = "#B58863"
 SELECTED_BROWN_TILE_COLOR = "#855843"
-
-class GUIBoard(QFrame):
-
-    def __init__(self, parent, game):
-        super().__init__(parent)
-        
-        self.game = game
-        self.tiles = []
-        self.tiles_enabled = False
-
-        
-        self.layout = QGridLayout()
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.setSpacing(0)
-        self.setLayout(self.layout)
-
-        self.set_up()
-
-    def set_up(self):
-        while self.layout.count():
-            child = self.layout.takeAt(0)
-            if child.widget():
-                child.widget().deleteLater()
-        self.tiles = []
-        for row in range(self.game.board.height):
-            self.tiles.append([])
-            for col in range(self.game.board.width):
-                square = Tile(self,row,col)
-                square.clicked.connect(partial(self.tile_click,row,col))
-                if row % 2 == col % 2:
-                    square.setStyleSheet(f'background-color: {WHITE_TILE_COLOR}')
-                else:
-                    square.setStyleSheet(f'background-color: {BROWN_TILE_COLOR}')
-                self.layout.addWidget(square, row, col)
-                self.tiles[-1].append(square)
-        self.update()
-
-    def tile_click(self,row,col):
-        self.disable_tiles()
-        self.game.select(row,col)
-        self.game.play()
-
-
-    def enable_tiles(self):
-        self.game.gui.processEvents()
-        self.game.gui.processEvents()
-        if not self.tiles_enabled:
-            print("enabling tiles")
-        self.tiles_enabled = True
-
-    def disable_tiles(self):
-        print("disabling tiles")
-        self.tiles_enabled = False
-
-    def update(self):
-        #draw pieces
-        for i in range(self.game.board.height):
-            for j in range(self.game.board.width):
-                contents = self.game.board.get_piece(i,j)
-                tile = self.tiles[i][j]
-                #print(f"{i}:{j}: {contents}")
-
-                if i % 2 == j % 2:
-                    if (i,j) == self.game.selected_tile:
-                        tile.setStyleSheet(f'background-color: {SELECTED_WHITE_TILE_COLOR}')
-                    else:
-                        tile.setStyleSheet(f'background-color: {WHITE_TILE_COLOR}')
-                else:
-                    if (i,j) == self.game.selected_tile:
-                        tile.setStyleSheet(f'background-color: {SELECTED_BROWN_TILE_COLOR}')
-                    else:
-                        tile.setStyleSheet(f'background-color: {BROWN_TILE_COLOR}')
-
-                marked = self.game.marked_tiles
-                valid_moves = self.game.selected_valid_moves
-
-                if contents is None:
-                    tile.content = EMPTY
-                else:
-                    if contents.color == WHITE:
-                        if contents.is_king:
-                            tile.content = WHITE_KING
-                        else:  
-                            tile.content = WHITE_PIECE
-                    else:
-                        if contents.is_king:
-                            tile.content = BLACK_KING
-                        else:  
-                            tile.content = BLACK_PIECE
-                    #print(self.game.board.marked)
-                    if (contents.x,contents.y) in marked:
-                        tile.marked = True
-                    else:
-                        tile.marked = False
-                if (tile.x, tile.y) in valid_moves:
-                    tile.valid_move = True
-                else:
-                    tile.valid_move = False
-                tile.update()
 
 class Tile(QLabel):
 
@@ -176,3 +78,108 @@ class Tile(QLabel):
             print(self.parent().tiles_enabled)
             if self.parent().tiles_enabled:
                 self.clicked.emit()
+
+class GUIBoard(QFrame):
+
+    game : Game
+    tiles = list[list[Tile]]
+    tiles_enabled : bool
+    layout : QLayout
+
+    def __init__(self, parent, game):
+        super().__init__(parent)
+        
+        self.game = game
+        self.tiles = []
+        self.tiles_enabled = False
+
+        
+        self.layout = QGridLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
+        self.setLayout(self.layout)
+
+        self.set_up()
+
+    def set_up(self) -> None:
+        while self.layout.count():
+            child = self.layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+        self.tiles = []
+        for row in range(self.game.board.height):
+            self.tiles.append([])
+            for col in range(self.game.board.width):
+                square = Tile(self,row,col)
+                square.clicked.connect(partial(self.tile_click,row,col))
+                if row % 2 == col % 2:
+                    square.setStyleSheet(f'background-color: {WHITE_TILE_COLOR}')
+                else:
+                    square.setStyleSheet(f'background-color: {BROWN_TILE_COLOR}')
+                self.layout.addWidget(square, row, col)
+                self.tiles[-1].append(square)
+        self.update()
+
+    def tile_click(self, row : int, col : int) -> None:
+        self.disable_tiles()
+        self.game.select(row,col)
+        self.game.play()
+
+
+    def enable_tiles(self) -> None:
+        self.game.gui.processEvents()
+        self.game.gui.processEvents()
+        if not self.tiles_enabled:
+            print("enabling tiles")
+        self.tiles_enabled = True
+
+    def disable_tiles(self) -> None:
+        print("disabling tiles")
+        self.tiles_enabled = False
+
+    def update(self) -> None:
+        #draw pieces
+        for i in range(self.game.board.height):
+            for j in range(self.game.board.width):
+                contents = self.game.board.get_piece(i,j)
+                tile = self.tiles[i][j]
+                #print(f"{i}:{j}: {contents}")
+
+                if i % 2 == j % 2:
+                    if (i,j) == self.game.selected_tile:
+                        tile.setStyleSheet(f'background-color: {SELECTED_WHITE_TILE_COLOR}')
+                    else:
+                        tile.setStyleSheet(f'background-color: {WHITE_TILE_COLOR}')
+                else:
+                    if (i,j) == self.game.selected_tile:
+                        tile.setStyleSheet(f'background-color: {SELECTED_BROWN_TILE_COLOR}')
+                    else:
+                        tile.setStyleSheet(f'background-color: {BROWN_TILE_COLOR}')
+
+                marked = self.game.marked_tiles
+                valid_moves = self.game.selected_valid_moves
+
+                if contents is None:
+                    tile.content = EMPTY
+                else:
+                    if contents.color == WHITE:
+                        if contents.is_king:
+                            tile.content = WHITE_KING
+                        else:  
+                            tile.content = WHITE_PIECE
+                    else:
+                        if contents.is_king:
+                            tile.content = BLACK_KING
+                        else:  
+                            tile.content = BLACK_PIECE
+                    #print(self.game.board.marked)
+                    if (contents.x,contents.y) in marked:
+                        tile.marked = True
+                    else:
+                        tile.marked = False
+                if (tile.x, tile.y) in valid_moves:
+                    tile.valid_move = True
+                else:
+                    tile.valid_move = False
+                tile.update()
+

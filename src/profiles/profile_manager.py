@@ -9,7 +9,7 @@ class ProfileManager:
     profiles : dict[str,Profile]
     path : pathlib.Path
 
-    def __init__(self, path):
+    def __init__(self, path : pathlib.Path):
         self.path = path
         self.active_profile = None
         self.profiles_dict = {}
@@ -57,11 +57,11 @@ class ProfileManager:
             return True
         return False
     
-    def register_win(self):
+    def register_win(self) -> None:
         if self.active_profile is not None:
             self.active_profile.register_win()
 
-    def register_loss(self):
+    def register_loss(self) -> None:
         if self.active_profile is not None:
             self.active_profile.register_loss()
     

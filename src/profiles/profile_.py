@@ -2,7 +2,7 @@ class Profile:
     name : str
     stats : dict[str,int]
 
-    def __init__(self, name):
+    def __init__(self, name : str):
         self.name = name
 
         #initialize stats here
@@ -20,15 +20,15 @@ class Profile:
         return self.stats["wins"]
     
     @property
-    def losses(self):
+    def losses(self) -> int:
         return self.stats["losses"]
     
     @property
-    def games(self):
+    def games(self) -> int:
         return self.wins + self.losses
 
     @property
-    def win_ratio(self):
+    def win_ratio(self) -> float:
         if self.games == 0:
             return -1
         return self.wins / self.games

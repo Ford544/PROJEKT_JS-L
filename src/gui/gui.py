@@ -124,6 +124,7 @@ class GameView(QFrame):
         self.game.play()
 
     def return_button_effect(self):
+        self.game.paused = True
         self.window.go_to_menu()
 
     def set_banner_text(self, text):
@@ -449,6 +450,7 @@ class MainWindow(QMainWindow):
         self.game_view.game.configure(size,capturing_obligatory,player1_mode,player1_name,player2_mode,player2_name)
         self.stack.setCurrentWidget(self.game_view)
         self.game_view.board.set_up()
+        self.game_view.game.paused = False
         self.game_view.game.play()
 
     def go_to_menu(self):
