@@ -1,0 +1,126 @@
+from PySide6.QtWidgets import *
+from PySide6.QtCore import *
+
+
+class NewGameMenu(QFrame):
+
+    window : QMainWindow
+
+    user1_name_input : QLineEdit
+    user1_radio_group : QButtonGroup
+    user2_name_input : QLineEdit
+    user2_radio_group : QButtonGroup
+    size_radio_group : QButtonGroup
+    capturing_obligatory_checkbox : QCheckBox
+
+    def __init__(self, parent, window : QMainWindow):
+
+        super().__init__(parent)
+        self.window = window
+
+        main_layout = QHBoxLayout()
+
+        menu_layout = QVBoxLayout()
+
+        user1_layout = QVBoxLayout()
+        user1_button_layout = QHBoxLayout()
+
+        self.user1_name_input = QLineEdit()
+        if window.manager.active_profile is not None:
+            human_name = window.manager.active_profile.name
+        else:
+            human_name = "Human"
+        self.user1_name_input.setText(human_name)
+        self.user1_radio_group = QButtonGroup()
+        human_radio = QRadioButton("Human")
+        self.user1_radio_group.addButton(human_radio)
+        self.user1_radio_group.setId(human_radio, -2)
+        user1_button_layout.addWidget(human_radio)
+        random_radio = QRadioButton("Random AI")
+        self.user1_radio_group.addButton(random_radio)
+        self.user1_radio_group.setId(random_radio, 0)
+        user1_button_layout.addWidget(random_radio)
+        weak_radio = QRadioButton("Weak AI")
+        self.user1_radio_group.addButton(weak_radio)
+        self.user1_radio_group.setId(weak_radio, 2)
+        user1_button_layout.addWidget(weak_radio)
+        strong_radio = QRadioButton("Strong AI")
+        self.user1_radio_group.addButton(strong_radio)
+        self.user1_radio_group.setId(strong_radio, 3)
+        user1_button_layout.addWidget(strong_radio)
+        human_radio.setChecked(True)
+        #checkbox for profile player?
+
+        user1_layout.addWidget(self.user1_name_input)
+        user1_layout.addLayout(user1_button_layout)
+
+        user2_layout = QVBoxLayout()
+        user2_button_layout = QHBoxLayout()
+
+        self.user2_name_input = QLineEdit()
+        self.user2_name_input.setText("AI")
+        self.user2_radio_group = QButtonGroup()
+        human_radio = QRadioButton("Human")
+        self.user2_radio_group.addButton(human_radio)
+        self.user2_radio_group.setId(human_radio, -2)
+        user2_button_layout.addWidget(human_radio)
+        random_radio = QRadioButton("Random AI")
+        self.user2_radio_group.addButton(random_radio)
+        self.user2_radio_group.setId(random_radio, 0)
+        user2_button_layout.addWidget(random_radio)
+        weak_radio = QRadioButton("Weak AI")
+        self.user2_radio_group.addButton(weak_radio)
+        self.user2_radio_group.setId(weak_radio, 2)
+        user2_button_layout.addWidget(weak_radio)
+        strong_radio = QRadioButton("Strong AI")
+        self.user2_radio_group.addButton(strong_radio)
+        self.user2_radio_group.setId(strong_radio, 3)
+        user2_button_layout.addWidget(strong_radio)
+        weak_radio.setChecked(True)
+        #checkbox for profile player?
+
+        user2_layout.addWidget(self.user2_name_input)
+        user2_layout.addLayout(user2_button_layout)
+
+        size_layout = QHBoxLayout()
+
+        self.size_radio_group = QButtonGroup()
+        size8_button = QRadioButton("8x8")
+        self.size_radio_group.addButton(size8_button)
+        self.size_radio_group.setId(size8_button, 8)
+        size_layout.addWidget(size8_button)
+        size10_button = QRadioButton("10x10")
+        self.size_radio_group.addButton(size10_button)
+        self.size_radio_group.setId(size10_button, 10)
+        size_layout.addWidget(size10_button)
+        size8_button.setChecked(True)
+
+        settings_layout = QVBoxLayout()
+        self.capturing_obligatory_checkbox = QCheckBox("Capturing obligatory")
+        self.capturing_obligatory_checkbox.setChecked(True)
+
+        settings_layout.addWidget(self.capturing_obligatory_checkbox)
+
+        start_button = QPushButton("Start game")
+        start_button.clicked.connect(self.start_button_effect)
+
+        menu_layout.addLayout(user1_layout)
+        menu_layout.addLayout(user2_layout)
+        menu_layout.addLayout(size_layout)
+        menu_layout.addLayout(settings_layout)
+        menu_layout.addWidget(start_button)
+
+        main_layout.addStretch(stretch=1)
+        main_layout.addLayout(menu_layout)
+        main_layout.addStretch(stretch=1)
+
+        self.setLayout(main_layout)
+
+    def start_button_effect(self) -> None:
+        if self.user1_name_input.text() == "":
+            return
+        if self.user2_name_input.text() == "":
+            return
+        self.window.start_game(self.size_radio_group.checkedId(), self.capturing_obligatory_checkbox.isChecked(),
+                              self.user1_radio_group.checkedId(),self.user1_name_input.text(),
+                              self.user2_radio_group.checkedId(),self.user2_name_input.text())
