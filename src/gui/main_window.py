@@ -43,6 +43,7 @@ class MainWindow(QMainWindow):
         self.game_view.update()
 
     def closeEvent(self, event):
+        self.game_view.game.paused = True
         self.manager.save()
         super().closeEvent(event)
 

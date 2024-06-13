@@ -2,7 +2,7 @@ from functools import partial
 
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
-from PySide6.QtGui import QPainter, QPen, QColor
+from PySide6.QtGui import QPainter, QPen, QColor, QPixmap
 
 from ..consts import WHITE
 from ..game.game import Game
@@ -20,6 +20,9 @@ WHITE_TILE_COLOR = "#EEEEEE"
 SELECTED_WHITE_TILE_COLOR = "#AAAAAA"
 BROWN_TILE_COLOR = "#B58863"
 SELECTED_BROWN_TILE_COLOR = "#855843"
+
+WHITE_CROWN_PATH = "assets/white_crown.png"
+BLACK_CROWN_PATH = "assets/black_crown.png"
 
 class Tile(QLabel):
 
@@ -60,13 +63,18 @@ class Tile(QLabel):
             radius = min(rect.width(), rect.height()) // 4 - pen.width() // 4
             qp.drawEllipse(center, radius, radius)
 
+            if self.content == WHITE_KING or self.content == BLACK_KING:
+                qp.drawLine(center.x() - radius, center.y(), center.x() + radius, center.y())
+                qp.drawLine(center.x(), center.y() - radius, center.x(), center.y() + radius)
+                
+
             #tilt 45 degrees
             if self.marked:
                 pen = QPen(QColor(255, 0, 0), 5, Qt.SolidLine)
                 qp.setPen(pen)
                 
-                qp.drawLine(center.x() - radius, center.y(), center.x() + radius, center.y())
-                qp.drawLine(center.x(), center.y() - radius, center.x(), center.y() + radius)
+                qp.drawLine(center.x() - radius, center.y() - radius, center.x() + radius, center.y() + radius)
+                qp.drawLine(center.x() + radius, center.y() - radius, center.x() - radius, center.y() + radius)
 
         if self.valid_move:
             qp.setBrush(QColor(0, 255, 0))
