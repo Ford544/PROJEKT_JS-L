@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from .piece import Piece
-from ..consts import BLACK, WHITE, CAPTURING_OBLIGATORY, MAXIMUM_CAPTURING_OBLIGATORY
+from ..consts import BLACK, WHITE, CAPTURING_OBLIGATORY, MAXIMUM_CAPTURING_OBLIGATORY, DRAW, DRAW_MOVE_THRESHOLD
 
 class Move:
 
@@ -55,6 +55,7 @@ class Board:
     pieces_capturing_backwards : bool
     flying_kings : bool
     mid_jump_crowning : bool
+    moves_without_capture : int
 
     board : list[list[Piece | None]]
     pieces : list[Piece]
@@ -86,6 +87,7 @@ class Board:
         self.valid_moves = {}
         self.active_player = WHITE
         self.marked = []
+        self.moves_without_capture = 0
 
         self.update_valid_moves(self.active_player)
 
@@ -115,6 +117,8 @@ class Board:
             return BLACK
         if self.no_valid_moves():
             return -1*self.active_player
+        if self.moves_without_capture >= DRAW_MOVE_THRESHOLD:
+            return DRAW
         return 0
     
     def no_valid_moves(self) -> bool:
@@ -236,6 +240,12 @@ class Board:
                     piece.is_king = True
 
                 self.active_player *= -1
+
+                if len(self.marked) == 0:
+                    self.moves_without_capture += 1
+                else:
+                    self.moves_without_capture = 0
+
                 for marked_piece in self.marked:
                     self.remove(marked_piece)
                 self.marked = []

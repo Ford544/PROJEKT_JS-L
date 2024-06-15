@@ -59,6 +59,7 @@ class ProfileManagerMenu(QFrame):
         self.stat_labels["total_games"] = QLabel()
         self.stat_labels["wins"] = QLabel()
         self.stat_labels["losses"] = QLabel()
+        self.stat_labels["draws"] = QLabel()
         self.stat_labels["win_ratio"] = QLabel()
         self.clear_stats()
         for label in self.stat_labels.values():
@@ -82,6 +83,7 @@ class ProfileManagerMenu(QFrame):
         self.stat_labels["total_games"].setText(f"Total games played: -")
         self.stat_labels["wins"].setText(f"Games won: -")
         self.stat_labels["losses"].setText(f"Games lost: -")
+        self.stat_labels["draws"].setText("Draws: -")
         self.stat_labels["win_ratio"].setText(f"Win ratio: -")
 
     #enable/disable buttons?
@@ -94,6 +96,7 @@ class ProfileManagerMenu(QFrame):
                 self.stat_labels["total_games"].setText(f"Total games played: {profile.games}")
                 self.stat_labels["wins"].setText(f"Games won: {profile.wins}")
                 self.stat_labels["losses"].setText(f"Games lost: {profile.losses}")
+                self.stat_labels["draws"].setText(f"Draws: {profile.draws}")
                 if profile.win_ratio == -1:
                     percentage = "-"
                 else:

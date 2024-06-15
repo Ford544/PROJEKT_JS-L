@@ -64,6 +64,10 @@ class ProfileManager:
     def register_loss(self) -> None:
         if self.active_profile is not None:
             self.active_profile.register_loss()
+
+    def register_draw(self) -> None:
+        if self.active_profile is not None:
+            self.active_profile.register_draw()
     
     @property
     def profiles(self) -> list[Profile]:

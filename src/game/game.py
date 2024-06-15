@@ -8,7 +8,7 @@ from .human_player import HumanPlayer
 from .random_player import RandomPlayer
 from .minimax_player import MinimaxPlayer
 from ..profiles.profile_manager import ProfileManager
-from ..consts import BLACK,WHITE,MAXIMUM_CAPTURING_OBLIGATORY
+from ..consts import BLACK,WHITE,MAXIMUM_CAPTURING_OBLIGATORY, DRAW
 
 class Game:
 
@@ -43,20 +43,23 @@ class Game:
     def play(self): 
         while self.board.winner == 0 and not self.paused:
             if self.board.active_player == WHITE:
-                self.gui.set_banner_text("WHITE'S TURN")
+                self.gui.set_banner_text(f"{self.white_player.name}'S (WHITE) TURN")
                 if self.white_player.pass_control():
                     return
             else:
-                self.gui.set_banner_text("BLACK'S TURN")
+                self.gui.set_banner_text(f"{self.black_player.name}'S (BLACK) TURN")
                 if self.black_player.pass_control():
                     return
             self.gui.processEvents()
         if self.board.winner == BLACK:
-            self.gui.set_banner_text("Black has won!")
+            self.gui.set_banner_text(f"{self.black_player.name} has won!")
             self.register_game(self.black_player)
         elif self.board.winner == WHITE:
-            self.gui.set_banner_text("White has won!")
+            self.gui.set_banner_text(f"{self.white_player.name} has won!")
             self.register_game(self.white_player)
+        elif self.board.winner == DRAW:
+            self.gui.set_banner_text(f"Game ends in draw!")
+            self.register_game(None)
 
     def restart(self) -> None:
         self.board.set_up()
@@ -103,8 +106,10 @@ class Game:
         self.selected = target
         self.gui.update()
 
-    def register_game(self, winner : Player) -> None:
-        if winner.profile:
+    def register_game(self, winner : Player | None) -> None:
+        if winner is None:
+            self.manager.register_draw()
+        elif winner.profile:
             self.manager.register_win()
         else:
             self.manager.register_loss()
