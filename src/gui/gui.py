@@ -10,8 +10,8 @@ from .main_window import MainWindow
 class GUI:
 
     app : QApplication
+    game : Game
     window : MainWindow
-    #unneeded?
     manager : ProfileManager
 
     def init(self):
@@ -27,24 +27,22 @@ class GUI:
         #self.game.play()
         self.run()
     
-    def run(self):
+    def run(self) -> None:
         self.app.exec()
 
-    def update(self):
+    def update(self) -> None:
         self.window.update()
 
     def processEvents(self):
         self.app.processEvents()
 
-    @property
     def enable_tiles(self):
-        return self.window.enable_tiles
+        return self.window.enable_tiles()
 
-    @property
     def disable_tiles(self):
-        return self.window.disable_tiles
+        return self.window.disable_tiles()
     
-    def set_banner_text(self, text):
+    def set_banner_text(self, text : str) -> None:
         return self.window.set_banner_text(text)
 
 

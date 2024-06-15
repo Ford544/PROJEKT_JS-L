@@ -10,10 +10,9 @@ class MainMenu(QFrame):
     quick_start_button : QPushButton
     new_game_button : QPushButton
     profiles_button : QPushButton
-
     profile_name_banner : QLabel
     
-    def __init__(self, parent, window):
+    def __init__(self, parent, window : QMainWindow):
     
         super().__init__(parent)
         self.window = window
@@ -57,16 +56,16 @@ class MainMenu(QFrame):
         self.setLayout(main_layout)
         self.setStyleSheet('background-color: #338888;')
 
-    def quick_start_button_effect(self):
+    def quick_start_button_effect(self) -> None:
         self.window.quick_game()
 
-    def profiles_button_effect(self):
+    def profiles_button_effect(self) -> None:
         self.window.enter_profiles_menu()
 
-    def new_game_button_effect(self):
+    def new_game_button_effect(self) -> None:
         self.window.enter_new_game_menu()
 
-    def set_profile_name_message(self):
+    def set_profile_name_message(self) -> None:
         if self.window.manager.active_profile is not None:
             self.profile_name_banner.setText(f"Welcome, {self.window.manager.active_profile.name}!")
         else:

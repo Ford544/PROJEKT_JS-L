@@ -39,7 +39,7 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.stack)
 
-    def update(self):
+    def update(self) -> None:
         self.main_menu.update()
         self.game_view.update()
 
@@ -77,11 +77,11 @@ class MainWindow(QMainWindow):
         self.new_game_menu.set_up()
         self.stack.setCurrentWidget(self.new_game_menu)
     
-    def enable_tiles(self):
-        return self.game_view.enable_tiles()
+    def enable_tiles(self) -> None:
+        self.game_view.enable_tiles()
     
-    def disable_tiles(self):
-        return self.game_view.disable_tiles()
+    def disable_tiles(self) -> None:
+        self.game_view.disable_tiles()
     
-    def set_banner_text(self, text):
+    def set_banner_text(self, text : str) -> None:
         self.game_view.set_banner_text(text)

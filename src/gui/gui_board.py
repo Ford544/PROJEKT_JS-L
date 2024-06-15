@@ -2,7 +2,7 @@ from functools import partial
 
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
-from PySide6.QtGui import QPainter, QPen, QColor, QPixmap
+from PySide6.QtGui import QPainter, QPen, QColor
 
 from ..consts import WHITE
 from ..game.game import Game
@@ -33,7 +33,7 @@ class Tile(QLabel):
     marked : bool
     valid_move : bool
 
-    def __init__(self,parent, x, y):
+    def __init__(self,parent, x : int, y : int):
         super().__init__(parent)
         self.content = EMPTY
         self.x = x
@@ -49,7 +49,6 @@ class Tile(QLabel):
         center = rect.center()
         if self.content != EMPTY:
 
-            #TODO make kings distinct visually
             if self.content == WHITE_PIECE or self.content == WHITE_KING:
                 qcolor = QColor(255, 255, 255)
             if self.content == BLACK_PIECE or self.content == BLACK_KING:
@@ -67,8 +66,6 @@ class Tile(QLabel):
                 qp.drawLine(center.x() - radius, center.y(), center.x() + radius, center.y())
                 qp.drawLine(center.x(), center.y() - radius, center.x(), center.y() + radius)
                 
-
-            #tilt 45 degrees
             if self.marked:
                 pen = QPen(QColor(255, 0, 0), 5, Qt.SolidLine)
                 qp.setPen(pen)
@@ -84,12 +81,7 @@ class Tile(QLabel):
         if event.button() == Qt.LeftButton:
             if self.parent().tiles_enabled:
                 self.clicked.emit()
-    
-    def heightForWidth(self, arg__1: int) -> int:
-        return arg__1
-    
-    def widthForHeight(self, arg__1: int) -> int:
-        return arg__1
+
 
 class GUIBoard(QFrame):
 
@@ -98,7 +90,7 @@ class GUIBoard(QFrame):
     tiles_enabled : bool
     layout : QLayout
 
-    def __init__(self, parent, game):
+    def __init__(self, parent, game : Game):
         super().__init__(parent)
         
         self.game = game
@@ -192,6 +184,4 @@ class GUIBoard(QFrame):
                     tile.valid_move = False
                 tile.update()
 
-    def heightForWidth(self, arg__1: int) -> int:
-        return arg__1
 

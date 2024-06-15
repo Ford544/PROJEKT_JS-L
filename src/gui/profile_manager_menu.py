@@ -121,14 +121,14 @@ class ProfileManagerMenu(QFrame):
         else:
             self.clear_stats()
 
-    def choose_button_effect(self):
+    def choose_button_effect(self) -> None:
         selected = self.profile_list.currentItem()
         profile = self.manager.get_profile(selected.text())
         if profile is not None:
             self.manager.active_profile = profile
             self.window.go_to_menu()
     
-    def add_profile(self):
+    def add_profile(self) -> None:
         text = self.name_field.text().strip()
         if text:
             if not self.manager.add_profile(text):
@@ -139,11 +139,11 @@ class ProfileManagerMenu(QFrame):
             self.manager.set_active_profile(text)
 
 
-    def remove_profile(self):
+    def remove_profile(self) -> None:
         selected = self.profile_list.currentItem()
         if selected is not None:
             self.manager.remove_profile(selected.text())
             self.load_data()
 
-    def return_button_effect(self):
+    def return_button_effect(self) -> None:
         self.window.go_to_menu()

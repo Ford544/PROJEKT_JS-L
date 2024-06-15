@@ -21,10 +21,7 @@ class MinimaxPlayer(Player):
 
         self.counter = 0
         
-        value, best_moves = self.minimax(self.game.board, self.depth, self.white, float("-inf"), float("+inf"))
-        print(f"move value = {value}")
-
-        print(f"board was evaluated {self.counter} razy!")
+        _, best_moves = self.minimax(self.game.board, self.depth, self.white, float("-inf"), float("+inf"))
 
         piece, move = random.choice(best_moves)
         
@@ -38,7 +35,7 @@ class MinimaxPlayer(Player):
         
         return False
     
-    def minimax(self, board : Board, level : int, max_ : bool, alpha : float, beta : float):
+    def minimax(self, board : Board, level : int, max_ : bool, alpha : float, beta : float) -> tuple[float, list[tuple[Piece, Move]]]:
         value = self.evaluate_board(board)
         if level == 0 or value == float("+inf") or value == float("-inf"):
             self.counter += 1

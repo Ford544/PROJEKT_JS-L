@@ -46,11 +46,13 @@ class Move:
 class Board:
 
     size : int
-    #those two are currently redundand, as they always equal to size and each other
-    #they're kept for the sake of potential extendability (we may potentially want to add some strange
+
+    #those two are currently redundant, as they always equal to size and each other
+    #they're kept for the sake of extendability (we may potentially want to add some strange
     #rule variant with non-square board)
     width : int
     height : int
+
     capturing_obligatory : int
     pieces_capturing_backwards : bool
     flying_kings : bool
@@ -61,7 +63,7 @@ class Board:
     pieces : list[Piece]
     valid_moves : dict[Piece, list[Move]]
     active_player : int
-    marked : list[tuple[int]]
+    marked : list[tuple[int,int]]
 
     def __init__(self, size, capturing_obligatory : int, pieces_capturing_backwards : bool, flying_kings : bool, 
                  mid_jump_crowning : bool):

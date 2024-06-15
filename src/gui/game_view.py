@@ -15,7 +15,7 @@ class GameView(QFrame):
     banner : QLabel
     board : GUIBoard
 
-    def __init__(self, parent, window, game):
+    def __init__(self, parent, window : QMainWindow, game : Game):
 
         super().__init__(parent)
 
@@ -52,8 +52,6 @@ class GameView(QFrame):
         self.board = GUIBoard(self,self.game)
         central_layout.addWidget(self.board)
 
-        self.left_spacing = QSpacerItem(0,0)
-        self.right_spacing = QSpacerItem(0,0)
         main_layout.addStretch()
         main_layout.addWidget(central_frame)
         main_layout.addStretch()
@@ -62,27 +60,23 @@ class GameView(QFrame):
         self.setStyleSheet('QFrame { background-color: #338888; }')
         self.setLayout(main_layout)
 
-    def reset_button_effect(self):
+    def reset_button_effect(self) -> None:
         self.game.restart()
         self.game.play()
 
-    def return_button_effect(self):
+    def return_button_effect(self) -> None:
         self.game.paused = True
         self.window.go_to_menu()
 
-    def set_banner_text(self, text):
+    def set_banner_text(self, text : str) -> None:
         self.banner.setText(text)
         self.update()
-
-    @property
-    def tiles(self):
-        return self.board.tiles
     
-    def enable_tiles(self):
+    def enable_tiles(self) -> None:
         self.board.enable_tiles()
     
-    def disable_tiles(self):
+    def disable_tiles(self) -> None:
         self.board.disable_tiles()
     
-    def update(self):
+    def update(self) -> None:
         self.board.update()

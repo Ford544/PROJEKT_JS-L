@@ -40,7 +40,7 @@ class Game:
        self.manager = manager
        self.paused = False
 
-    def play(self): 
+    def play(self) -> None: 
         while self.board.winner == 0 and not self.paused:
             if self.board.active_player == WHITE:
                 self.gui.set_banner_text(f"{self.white_player.name}'S (WHITE) TURN")
@@ -88,7 +88,7 @@ class Game:
                return MinimaxPlayer(self, name, profile, n, white)
               
 
-    def select(self, x : int, y : int):
+    def select(self, x : int, y : int) -> None:
         target = self.board.get_piece(x,y)
         if target is None:
             if self.selected is not None:
@@ -115,23 +115,23 @@ class Game:
             self.manager.register_loss()
 
     @property
-    def selected_tile(self):
+    def selected_tile(self) -> tuple[int,int]:
         if self.selected is None: return None
         return self.selected.x,self.selected.y
     
     @property
-    def selected_valid_moves(self):
+    def selected_valid_moves(self) -> list[tuple[int,int]]:
         if self.selected is None: return []
         if not self.selected in self.board.valid_moves.keys(): return []
         return [move.first_step for move in self.board.valid_moves[self.selected]]
     
     @property
-    def marked_tiles(self):
+    def marked_tiles(self) -> list[tuple[int,int]]:
         return self.board.marked
     
-    def enable_tiles(self):
+    def enable_tiles(self) -> None:
         self.gui.enable_tiles()
 
-    def disable_tiles(self):
+    def disable_tiles(self) -> None:
         self.gui.disable_tiles()
 
