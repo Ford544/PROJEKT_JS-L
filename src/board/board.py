@@ -109,6 +109,21 @@ class Board:
     def blacks(self) -> int:
         return len(self.pieces) - self.whites
     
+    def count_kings(self, color : int) -> int:
+        counter = 0
+        for piece in self.pieces:
+            if piece.color == color and piece.is_king:
+                counter += 1
+        return counter
+    
+    @property
+    def white_kings(self) -> int:
+        return self.count_kings(WHITE)
+    
+    @property
+    def black_kings(self) -> int:
+        return self.count_kings(BLACK)
+    
     @property
     def winner(self) -> int:
         if self.blacks == 0:

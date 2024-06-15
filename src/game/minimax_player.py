@@ -3,7 +3,7 @@ import random
 import time
 
 from ..board.board import Board, Move
-from ..consts import WHITE, BLACK
+from ..consts import WHITE, BLACK, DRAW
 from ..board.piece import Piece
 from .player import Player
 
@@ -84,7 +84,9 @@ class MinimaxPlayer(Player):
             return float("+inf")
         if board.winner == BLACK:
             return float("-inf")
-        return float(board.whites - board.blacks)
+        if board.winner == DRAW:
+            return 0.
+        return float(board.whites - board.blacks + 0.5*board.white_kings - 0.5*board.black_kings)
     
     def simulate_move(self, board : Board , piece : Piece, move : Move) -> Board:
 
