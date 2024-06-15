@@ -3,6 +3,7 @@ from PySide6.QtCore import *
 
 from ..game.game import Game
 from .gui_board import GUIBoard
+from ..consts import MENU_STYLE
 
 class GameView(QFrame):
 
@@ -21,31 +22,44 @@ class GameView(QFrame):
         self.window = window
         self.game = game
 
-        main_layout = QVBoxLayout()
+        main_layout = QHBoxLayout()
+
+        central_layout = QVBoxLayout()
+        central_frame = QFrame()
+        central_frame.setLayout(central_layout)
+        central_frame.setStyleSheet(MENU_STYLE)
 
         self.banner = QLabel(self)
         self.banner.setText("Hey")
         self.banner.setFixedSize(720,20)
         self.banner.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(self.banner)
+        central_layout.addWidget(self.banner)
 
         button_layout = QHBoxLayout()
 
         self.reset_button = QPushButton("Reset")
         self.reset_button.clicked.connect(self.reset_button_effect)
-        button_layout.addWidget(self.reset_button)
-
+        
         self.return_button = QPushButton("Return")
         self.return_button.clicked.connect(self.return_button_effect)
+
+        button_layout.addWidget(self.reset_button)
+        button_layout.addStretch(stretch=1)
         button_layout.addWidget(self.return_button)
 
-        main_layout.addLayout(button_layout)
+        central_layout.addLayout(button_layout)
         
         self.board = GUIBoard(self,self.game)
-        main_layout.addWidget(self.board)
+        central_layout.addWidget(self.board)
+
+        self.left_spacing = QSpacerItem(0,0)
+        self.right_spacing = QSpacerItem(0,0)
+        main_layout.addStretch()
+        main_layout.addWidget(central_frame)
+        main_layout.addStretch()
 
         self.setMinimumSize(QSize(760, 660))
-        self.setStyleSheet('background-color: #338888;')
+        self.setStyleSheet('QFrame { background-color: #338888; }')
         self.setLayout(main_layout)
 
     def reset_button_effect(self):

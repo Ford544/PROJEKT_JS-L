@@ -1,6 +1,8 @@
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 
+from ..consts import MENU_STYLE
+
 class MainMenu(QFrame):
 
     window : QMainWindow
@@ -16,11 +18,19 @@ class MainMenu(QFrame):
         super().__init__(parent)
         self.window = window
 
+        banner = QLabel("Checkers")
+        banner.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        banner.setStyleSheet("QLabel { font-size: 20pt }")
 
         main_layout = QHBoxLayout()
         
         button_layout = QVBoxLayout()
 
+        central_frame = QFrame()
+        central_frame.setLayout(button_layout)
+        central_frame.setStyleSheet(MENU_STYLE)
+
+        button_layout.addWidget(banner)
         button_layout.addStretch()
         self.quick_start_button = QPushButton("Quick start")
         self.quick_start_button.clicked.connect(self.quick_start_button_effect)
@@ -40,9 +50,8 @@ class MainMenu(QFrame):
         self.set_profile_name_message()
         button_layout.addWidget(self.profile_name_banner)
         
-
         main_layout.addStretch(stretch=1)
-        main_layout.addLayout(button_layout,stretch=1)
+        main_layout.addWidget(central_frame,stretch=1)
         main_layout.addStretch(stretch=1)
 
         self.setLayout(main_layout)

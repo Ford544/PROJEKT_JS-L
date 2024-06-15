@@ -1,8 +1,7 @@
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 
-from ..consts import CAPTURING_OPTIONAL, CAPTURING_OBLIGATORY, MAXIMUM_CAPTURING_OBLIGATORY, BRAZILIAN, POLISH, AMERICAN, CANADIAN, RUSSIAN
-
+from ..consts import CAPTURING_OPTIONAL, CAPTURING_OBLIGATORY, MAXIMUM_CAPTURING_OBLIGATORY, BRAZILIAN, POLISH, AMERICAN, CANADIAN, RUSSIAN, MENU_STYLE
 
 class NewGameMenu(QFrame):
 
@@ -30,6 +29,10 @@ class NewGameMenu(QFrame):
 
         menu_layout = QVBoxLayout()
 
+        menu_frame = QFrame()
+        menu_frame.setLayout(menu_layout)
+        menu_frame.setStyleSheet(MENU_STYLE)
+
         user1_layout = QVBoxLayout()
         user1_button_layout = QHBoxLayout()
 
@@ -41,11 +44,6 @@ class NewGameMenu(QFrame):
         neither_profile_radio.setHidden(True)
 
         self.user1_name_input = QLineEdit()
-        if window.manager.active_profile is not None:
-            human_name = window.manager.active_profile.name
-        else:
-            human_name = "Human"
-        self.user1_name_input.setText(human_name)
         self.user1_radio_group = QButtonGroup()
 
         self.make_radio_button("Human", self.user1_radio_group, -2, user1_button_layout)
@@ -146,10 +144,21 @@ class NewGameMenu(QFrame):
         menu_layout.addLayout(nav_buttons_layout)
 
         main_layout.addStretch(stretch=1)
-        main_layout.addLayout(menu_layout)
+        main_layout.addWidget(menu_frame)
         main_layout.addStretch(stretch=1)
 
         self.setLayout(main_layout)
+
+        self.setStyleSheet('QFrame { background-color: #338888; }')
+
+        self.set_up()
+
+    def set_up(self):
+        if self.window.manager.active_profile is not None:
+            human_name = self.window.manager.active_profile.name
+        else:
+            human_name = "Human"
+        self.user1_name_input.setText(human_name)
 
     def start_button_effect(self) -> None:
         if self.user1_name_input.text() == "":

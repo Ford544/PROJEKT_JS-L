@@ -2,6 +2,7 @@ from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 
 from ..profiles.profile_manager import ProfileManager
+from ..consts import MENU_STYLE
 
 
 class ProfileManagerMenu(QFrame):
@@ -26,7 +27,14 @@ class ProfileManagerMenu(QFrame):
         main_layout = QHBoxLayout()
 
         left_layout = QVBoxLayout()
+        left_frame = QFrame()
+        left_frame.setLayout(left_layout)
+        left_frame.setStyleSheet("QFrame{ background-color: #AAAAAA; border: 2px solid #CCCCCC; border-radius: 6px; font-size: 12pt}"
+                                    + "QPushButton{ background-color: #777777; border: 2px solid #888888; border-radius: 5px; font-size: 12pt }"
+                                    + "QPushButton:hover { background-color: #888888 }"
+                                    + "QLabel { border: 0px none}")
         self.profile_list = QListWidget()
+        self.profile_list.setStyleSheet("QListWidget{ font-size: 18pt }")
         self.profile_list.itemSelectionChanged.connect(self.profile_list_selection_change_effect)
         self.load_data()
         
@@ -54,7 +62,9 @@ class ProfileManagerMenu(QFrame):
         left_layout.addLayout(button_layout)
 
         right_layout = QVBoxLayout()
-
+        right_frame = QFrame()
+        right_frame.setLayout(right_layout)
+        right_frame.setStyleSheet(MENU_STYLE)
         self.stat_labels = {}
         self.stat_labels["total_games"] = QLabel()
         self.stat_labels["wins"] = QLabel()
@@ -69,8 +79,12 @@ class ProfileManagerMenu(QFrame):
         if manager.active_profile is not None:
             self.profile_list.setCurrentItem(self.profile_list.findItems(self.manager.active_profile.name,Qt.MatchFlag.MatchExactly)[0])
 
-        main_layout.addLayout(left_layout)
-        main_layout.addLayout(right_layout)
+        main_layout.addStretch()
+        main_layout.addWidget(left_frame)
+        main_layout.addWidget(right_frame)
+        main_layout.addStretch()
+
+        self.setStyleSheet('QFrame { background-color: #338888; }')
 
         self.setLayout(main_layout)
 
@@ -122,6 +136,7 @@ class ProfileManagerMenu(QFrame):
             else:
                 self.load_data()
             self.name_field.clear()
+            self.manager.set_active_profile(text)
 
 
     def remove_profile(self):

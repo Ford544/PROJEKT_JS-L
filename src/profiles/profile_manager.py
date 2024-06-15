@@ -68,6 +68,10 @@ class ProfileManager:
     def register_draw(self) -> None:
         if self.active_profile is not None:
             self.active_profile.register_draw()
+
+    def set_active_profile(self, name : str) -> None:
+        if name in self.profiles:
+            self.active_profile = self.profiles[name]
     
     @property
     def profiles(self) -> list[Profile]:

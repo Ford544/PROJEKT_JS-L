@@ -84,6 +84,12 @@ class Tile(QLabel):
         if event.button() == Qt.LeftButton:
             if self.parent().tiles_enabled:
                 self.clicked.emit()
+    
+    def heightForWidth(self, arg__1: int) -> int:
+        return arg__1
+    
+    def widthForHeight(self, arg__1: int) -> int:
+        return arg__1
 
 class GUIBoard(QFrame):
 
@@ -185,4 +191,7 @@ class GUIBoard(QFrame):
                 else:
                     tile.valid_move = False
                 tile.update()
+
+    def heightForWidth(self, arg__1: int) -> int:
+        return arg__1
 

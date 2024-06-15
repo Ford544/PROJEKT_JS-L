@@ -53,7 +53,7 @@ class MainWindow(QMainWindow):
             human_name = "Human"
         else:
             human_name = self.manager.active_profile.name
-        self.start_game(8, True, MAXIMUM_CAPTURING_OBLIGATORY, True, False, -2, human_name, 3, "SI", 1)
+        self.start_game(8, True, MAXIMUM_CAPTURING_OBLIGATORY, True, False, -2, human_name, 3, "AI", 1)
 
     def start_game(self, size : int, capturing_obligatory : int, pieces_capturing_backwards : bool, flying_kings : bool, 
                  mid_jump_crowning : bool, player1_mode : int, player1_name : str, player2_mode : int, player2_name : str, 
@@ -74,6 +74,7 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.profile_menu)
 
     def enter_new_game_menu(self) -> None:
+        self.new_game_menu.set_up()
         self.stack.setCurrentWidget(self.new_game_menu)
     
     def enable_tiles(self):

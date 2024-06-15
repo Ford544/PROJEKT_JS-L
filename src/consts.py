@@ -13,3 +13,5 @@ POLISH = 1
 AMERICAN = 2
 CANADIAN = 3
 RUSSIAN = 4
+
+MENU_STYLE = "QFrame{ background-color: #AAAAAA; border: 2px solid #CCCCCC; border-radius: 6px; font-size: 12pt}" + "QPushButton{ background-color: #777777; border: 2px solid #888888; border-radius: 5px; font-size: 12pt }" + "QPushButton:hover { background-color: #888888 }" + "QLabel { border: 0px none}"
