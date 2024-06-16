@@ -11,6 +11,7 @@ class Server:
     ip : str
     port : int
     socket_ : socket.socket
+    closed : bool
 
     def __init__(self, port : int, game):
         self.ip = self.get_ip()
@@ -18,6 +19,7 @@ class Server:
         print(port)
         self.port = port
         self.game = game
+        self.closed = False
 
     def set_up(self) -> bool:
         self.socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -34,7 +36,6 @@ class Server:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.settimeout(0)
         try:
-            # doesn't even have to be reachable
             s.connect(('10.254.254.254', 1))
             IP = s.getsockname()[0]
         except Exception:
@@ -52,7 +53,7 @@ class Server:
             conn.send(pickle.dumps((WHITE,self.game.white_player.name)))
         else:
             conn.send(pickle.dumps((BLACK,self.game.black_player.name)))
-        while True:
+        while not self.closed:
             try:
                 data = conn.recv(4096).decode()
                 print("server received: ", data)
@@ -70,6 +71,12 @@ class Server:
         conn.close()
 
     def wait_for_conn(self): 
-        conn, addr = self.socket_.accept()
-        print("Connected to:", addr)
-        self.listen(conn)
+        try:
+            conn, addr = self.socket_.accept()
+            print("Connected to:", addr)
+            self.listen(conn)
+        except error as e:
+            print("wait_for_conn has a problem: ", e)
+
+    def shut_down(self):
+        self.socket_.close()

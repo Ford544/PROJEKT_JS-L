@@ -71,7 +71,7 @@ class Game:
             self.register_game(None)
 
     #an information about waiting for connection?
-    def host(self, port : int = 5555) -> bool:
+    def host(self, port) -> bool:
         self.server = Server(port,self)
         if self.server.set_up():
             print("server is all set up")
@@ -96,7 +96,15 @@ class Game:
             board, selected = self.interface.send("get")
             self.board = board
             self.selected = selected
-        self.play()
+
+    def end(self):
+        if self.interface is not None:
+            self.interface.close()
+            self.interface = None
+        if self.server is not None:
+            self.server.closed = True
+            self.server.shut_down()
+            self.server = None
 
     def restart(self) -> None:
         self.board.set_up()
@@ -133,10 +141,13 @@ class Game:
 
     def select(self, x : int, y : int) -> bool:
         if self.interface is not None:
-            self.interface.send_select(x,y)
-            board, selected = self.interface.send("get")
-            self.board = board
-            self.selected = selected
+            try:
+                self.interface.send_select(x,y)
+                board, selected = self.interface.send("get")
+                self.board = board
+                self.selected = selected
+            except:
+                print("connection lost")
         else:
             target = self.board.get_piece(x,y)
             if target is None:

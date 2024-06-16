@@ -71,10 +71,42 @@ class MainMenu(QFrame):
         self.window.enter_new_game_menu()
 
     def join_button_effect(self):
-        self.window.connect_to_game()
+        dialog = RemoteJoinDialog()
+        if dialog.exec() == QDialog.Accepted:
+            ip, port = dialog.getInputs()
+            self.window.connect_to_game(ip, port)
 
     def set_profile_name_message(self) -> None:
         if self.window.manager.active_profile is not None:
             self.profile_name_banner.setText(f"Welcome, {self.window.manager.active_profile.name}!")
         else:
             self.profile_name_banner.setText(f"Welcome!")
+
+class RemoteJoinDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Join Remote Game")
+        
+        main_layout = QVBoxLayout()
+        self.setLayout(main_layout)
+        
+        self.label1 = QLabel("IP address:")
+        main_layout.addWidget(self.label1)
+        self.input1 = QLineEdit(self)
+        main_layout.addWidget(self.input1)
+        
+        self.label2 = QLabel("Port:")
+        main_layout.addWidget(self.label2)
+        self.input2 = QLineEdit(self)
+        self.input2.setText("5555")
+        main_layout.addWidget(self.input2)
+        
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        main_layout.addWidget(self.buttonBox)
+        
+        self.setLayout(main_layout)
+        
+    def getInputs(self):
+        return self.input1.text(), self.input2.text()

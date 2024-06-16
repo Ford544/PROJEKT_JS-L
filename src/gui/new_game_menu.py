@@ -18,6 +18,8 @@ class NewGameMenu(QFrame):
     pieces_capturing_backwards_checkbox : QCheckBox
     flying_kings_checkbox : QCheckBox
     mid_jump_crowning_checkbox : QCheckBox
+    start_button : QPushButton
+    host_button : QPushButton
 
 
     def __init__(self, parent, window : QMainWindow):
@@ -50,6 +52,7 @@ class NewGameMenu(QFrame):
         self.make_radio_button("Random AI", self.user1_radio_group, 0, user1_button_layout)
         self.make_radio_button("Weak AI", self.user1_radio_group, 2, user1_button_layout)
         self.make_radio_button("Strong AI", self.user1_radio_group, 3, user1_button_layout)
+        self.make_radio_button("Remote", self.user1_radio_group, -3, user1_button_layout)
         self.user1_radio_group.button(-2).setChecked(True)
         
         user1_layout.addWidget(self.user1_name_input)
@@ -69,6 +72,7 @@ class NewGameMenu(QFrame):
         self.make_radio_button("Random AI", self.user2_radio_group, 0, user2_button_layout)
         self.make_radio_button("Weak AI", self.user2_radio_group, 2, user2_button_layout)
         self.make_radio_button("Strong AI", self.user2_radio_group, 3, user2_button_layout)
+        self.make_radio_button("Remote", self.user2_radio_group, -3, user2_button_layout)
         self.user2_radio_group.button(2).setChecked(True)
 
         user2_layout.addWidget(self.user2_name_input)
@@ -125,18 +129,19 @@ class NewGameMenu(QFrame):
 
         nav_buttons_layout = QHBoxLayout()
 
-        start_button = QPushButton("Start game")
-        start_button.clicked.connect(self.start_button_effect)
+        self.start_button = QPushButton("Start game")
+        self.start_button.clicked.connect(self.start_button_effect)
 
         return_button = QPushButton("Back")
         return_button.clicked.connect(self.return_button_effect)
 
-        host_button = QPushButton("Host game")
-        host_button.clicked.connect(self.host_button_effect)
+        self.host_button = QPushButton("Host game")
+        self.host_button.clicked.connect(self.host_button_effect)
+        self.host_button.setDisabled(True)
 
-        nav_buttons_layout.addWidget(start_button, stretch=1)
+        nav_buttons_layout.addWidget(self.start_button, stretch=1)
         nav_buttons_layout.addStretch(stretch=1)
-        nav_buttons_layout.addWidget(host_button)
+        nav_buttons_layout.addWidget(self.host_button)
         nav_buttons_layout.addStretch(stretch=1)
         nav_buttons_layout.addWidget(return_button,stretch=1)        
 
@@ -182,12 +187,14 @@ class NewGameMenu(QFrame):
             return
         if self.user2_name_input.text() == "":
             return
-        self.window.host_game(self.size_radio_group.checkedId(), self.capturing_obligatory_radio_group.checkedId(), 
-                               self.pieces_capturing_backwards_checkbox.isChecked(), 
-                               self.flying_kings_checkbox.isChecked(), self.mid_jump_crowning_checkbox.isChecked(), 
-                               -2, self.user1_name_input.text(), 
-                               -3,self.user2_name_input.text(), 
-                               self.profile_player_radio_group.checkedId())
+        port, ok = QInputDialog.getInt(self, "Host game", "Choose port", 52000, 49152, 65535)
+        if ok:
+            self.window.host_game(self.size_radio_group.checkedId(), self.capturing_obligatory_radio_group.checkedId(), 
+                                self.pieces_capturing_backwards_checkbox.isChecked(), 
+                                self.flying_kings_checkbox.isChecked(), self.mid_jump_crowning_checkbox.isChecked(), 
+                                self.user1_radio_group.checkedId(), self.user1_name_input.text(), 
+                                self.user2_radio_group.checkedId(),self.user2_name_input.text(), 
+                                self.profile_player_radio_group.checkedId(), port)
         
     def return_button_effect(self) -> None:
         self.window.go_to_menu()
@@ -211,6 +218,23 @@ class NewGameMenu(QFrame):
             self.profile_player_radio_group.button(1).setChecked(True)
             self.profile_player_radio_group.button(1).setHidden(False)
             self.profile_player_radio_group.button(2).setHidden(False)
+        if user1_mode == -3:
+            self.profile_player_radio_group.button(2).setChecked(True)
+            self.profile_player_radio_group.button(1).setHidden(True)
+            self.profile_player_radio_group.button(2).setHidden(True)
+            self.user2_radio_group.button(-2).setChecked(True)
+            self.host_button.setDisabled(False)
+            self.start_button.setDisabled(True)
+        elif user2_mode == -3:
+            self.profile_player_radio_group.button(1).setChecked(True)
+            self.profile_player_radio_group.button(1).setHidden(True)
+            self.profile_player_radio_group.button(2).setHidden(True)
+            self.user1_radio_group.button(-2).setChecked(True)
+            self.host_button.setDisabled(False)
+            self.start_button.setDisabled(True)
+        else:
+            self.host_button.setDisabled(True)
+            self.start_button.setDisabled(False)
 
     def ruleset_change(self) -> None:
         ruleset = self.ruleset_radio_group.checkedId()

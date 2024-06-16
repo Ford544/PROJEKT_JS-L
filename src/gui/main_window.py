@@ -67,19 +67,25 @@ class MainWindow(QMainWindow):
 
     def host_game(self, size : int, capturing_obligatory : int, pieces_capturing_backwards : bool, flying_kings : bool, 
                  mid_jump_crowning : bool, player1_mode : int, player1_name : str, player2_mode : int, player2_name : str, 
-                 profile_player : int) -> None:
+                 profile_player : int, port : int) -> None:
         self.game_view.game.configure(size,capturing_obligatory,pieces_capturing_backwards,flying_kings,mid_jump_crowning,
                                       player1_mode,player1_name,player2_mode,player2_name, profile_player)
         self.stack.setCurrentWidget(self.game_view)
         self.game_view.board.set_up()
         self.game_view.game.paused = False
-        self.game_view.game.host()
+        self.game_view.game.host(port)
         self.game_view.game.play()
 
-    def connect_to_game(self, ip : str = "192.168.0.45", port : int = 5555, name : str = "Joe"):
-        self.stack.setCurrentWidget(self.game_view)
+    def connect_to_game(self, ip : str, port : str, name : str = "Joe"):
         self.game_view.board.set_up()
-        self.game_view.game.join(ip, port, name)
+        self.game_view.game.paused = False
+        try:
+            port = int(port)
+            self.game_view.game.join(ip, port, name)
+            self.stack.setCurrentWidget(self.game_view)
+            self.game_view.game.play()
+        except:
+            QMessageBox.warning(self, "Error", "Failed to connect. Make sure the address and port are correct.")
         
     def go_to_menu(self) -> None:
         self.main_menu.set_profile_name_message()
@@ -101,3 +107,4 @@ class MainWindow(QMainWindow):
     
     def set_banner_text(self, text : str) -> None:
         self.game_view.set_banner_text(text)
+

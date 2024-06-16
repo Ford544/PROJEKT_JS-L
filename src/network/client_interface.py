@@ -42,21 +42,5 @@ class ClientInterface:
         except:
             return None
         
-    def update_loop(self, remote_color : int): 
-        board,selected = self.send("get")
-        self.game.board = board
-        self.game.selected = selected
-        while board.active_player == remote_color and not self.game.paused:
-            time.sleep(0.1)
-            response = self.send("get")
-            print("client received: ", response)
-            board, selected = response
-            self.game.board = board
-            self.game.selected = selected
-            self.game.gui.update()
-        print("loop over, enabling tiles")
-        self.game.enable_tiles()
-
-
-    def run_update_loop(self, remote_color : int):
-        start_new_thread(self.update_loop, (remote_color,))
+    def close(self):
+        self.server.close()

@@ -1,3 +1,5 @@
+import time
+
 from .player import Player
 
 
@@ -10,7 +12,15 @@ class RemotePlayer(Player):
         self.color = color
 
     def pass_control(self) -> bool:
-        print("remote player activating")
         if self.game.interface is not None:
-            self.game.interface.run_update_loop(self.color)
-        return True
+            print("server player turn")
+            try:
+                board,selected = self.game.interface.send("get")
+                self.game.board = board
+                self.game.selected = selected
+                time.sleep(0.25)
+                self.game.gui.update()
+            except:
+                print("connection lost")
+                self.game.paused = True
+        return False
