@@ -131,7 +131,12 @@ class NewGameMenu(QFrame):
         return_button = QPushButton("Back")
         return_button.clicked.connect(self.return_button_effect)
 
+        host_button = QPushButton("Host game")
+        host_button.clicked.connect(self.host_button_effect)
+
         nav_buttons_layout.addWidget(start_button, stretch=1)
+        nav_buttons_layout.addStretch(stretch=1)
+        nav_buttons_layout.addWidget(host_button)
         nav_buttons_layout.addStretch(stretch=1)
         nav_buttons_layout.addWidget(return_button,stretch=1)        
 
@@ -153,7 +158,7 @@ class NewGameMenu(QFrame):
 
         self.set_up()
 
-    def set_up(self):
+    def set_up(self) -> None:
         if self.window.manager.active_profile is not None:
             human_name = self.window.manager.active_profile.name
         else:
@@ -170,6 +175,18 @@ class NewGameMenu(QFrame):
                                self.flying_kings_checkbox.isChecked(), self.mid_jump_crowning_checkbox.isChecked(), 
                                self.user1_radio_group.checkedId(), self.user1_name_input.text(), 
                                self.user2_radio_group.checkedId(),self.user2_name_input.text(), 
+                               self.profile_player_radio_group.checkedId())
+        
+    def host_button_effect(self) -> None:
+        if self.user1_name_input.text() == "":
+            return
+        if self.user2_name_input.text() == "":
+            return
+        self.window.host_game(self.size_radio_group.checkedId(), self.capturing_obligatory_radio_group.checkedId(), 
+                               self.pieces_capturing_backwards_checkbox.isChecked(), 
+                               self.flying_kings_checkbox.isChecked(), self.mid_jump_crowning_checkbox.isChecked(), 
+                               -2, self.user1_name_input.text(), 
+                               -3,self.user2_name_input.text(), 
                                self.profile_player_radio_group.checkedId())
         
     def return_button_effect(self) -> None:

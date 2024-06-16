@@ -10,6 +10,7 @@ class MainMenu(QFrame):
     quick_start_button : QPushButton
     new_game_button : QPushButton
     profiles_button : QPushButton
+    join_button : QPushButton
     profile_name_banner : QLabel
     
     def __init__(self, parent, window : QMainWindow):
@@ -39,6 +40,10 @@ class MainMenu(QFrame):
         self.new_game_button.clicked.connect(self.new_game_button_effect)
         button_layout.addWidget(self.new_game_button)
 
+        self.join_button = QPushButton("Join")
+        self.join_button.clicked.connect(self.join_button_effect)
+        button_layout.addWidget(self.join_button)
+
         self.profiles_button = QPushButton("Profiles")
         self.profiles_button.clicked.connect(self.profiles_button_effect)
         button_layout.addWidget(self.profiles_button)
@@ -64,6 +69,9 @@ class MainMenu(QFrame):
 
     def new_game_button_effect(self) -> None:
         self.window.enter_new_game_menu()
+
+    def join_button_effect(self):
+        self.window.connect_to_game()
 
     def set_profile_name_message(self) -> None:
         if self.window.manager.active_profile is not None:

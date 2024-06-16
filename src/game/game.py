@@ -7,7 +7,10 @@ from .player import Player
 from .human_player import HumanPlayer
 from .random_player import RandomPlayer
 from .minimax_player import MinimaxPlayer
+from.remote_player import RemotePlayer
 from ..profiles.profile_manager import ProfileManager
+from ..network.server import Server
+from ..network.client_interface import ClientInterface
 from ..consts import BLACK,WHITE,MAXIMUM_CAPTURING_OBLIGATORY, DRAW
 
 class Game:
@@ -18,6 +21,8 @@ class Game:
     black_player : Player
     manager : ProfileManager
     paused : bool
+    server : Server | None
+    interface : ClientInterface | None
 
     def __init__(self, gui, manager : ProfileManager, size : int = 8, 
                  capturing_obligatory : int = MAXIMUM_CAPTURING_OBLIGATORY, pieces_capturing_backwards : bool = True, 
@@ -25,6 +30,8 @@ class Game:
                  player1_name : str = "Player1", player2_mode : int = 2, player2_name : str = "Player2", 
                  profile_player : int = 1):
         #player modes:
+        # -4 - client
+        # -3 - remote (server)
         # -2 - human
         # 0 - random ai
         # n = 1,2,3,... - minimax with depth n
@@ -39,15 +46,17 @@ class Game:
        self.gui = gui
        self.manager = manager
        self.paused = False
+       self.server = None
+       self.interface = None
 
     def play(self) -> None: 
         while self.board.winner == 0 and not self.paused:
             if self.board.active_player == WHITE:
-                self.gui.set_banner_text(f"{self.white_player.name}'S (WHITE) TURN")
+                self.gui.set_banner_text(f"{self.white_player.name}'s (WHITE) TURN")
                 if self.white_player.pass_control():
                     return
             else:
-                self.gui.set_banner_text(f"{self.black_player.name}'S (BLACK) TURN")
+                self.gui.set_banner_text(f"{self.black_player.name}'s (BLACK) TURN")
                 if self.black_player.pass_control():
                     return
             self.gui.processEvents()
@@ -60,6 +69,34 @@ class Game:
         elif self.board.winner == DRAW:
             self.gui.set_banner_text(f"Game ends in draw!")
             self.register_game(None)
+
+    #an information about waiting for connection?
+    def host(self, port : int = 5555) -> bool:
+        self.server = Server(port,self)
+        if self.server.set_up():
+            print("server is all set up")
+            self.server.run()
+            return True
+        else:
+            print("server failed to get off the ground")
+            return False
+        
+    def join(self, ip : str, port : int, name : str) -> bool:
+        self.interface = ClientInterface(ip, port, self)
+        response = self.interface.connect()
+        if response is not None:
+            color, remote_name = response
+            color = int(color)
+            if color == BLACK:
+                self.white_player = HumanPlayer(self, name, True)
+                self.black_player = RemotePlayer(self, remote_name, False, BLACK)
+            else:
+                self.white_player = RemotePlayer(self, remote_name, False, WHITE)
+                self.black_player = HumanPlayer(self, name, True)
+            board, selected = self.interface.send("get")
+            self.board = board
+            self.selected = selected
+        self.play()
 
     def restart(self) -> None:
         self.board.set_up()
@@ -77,9 +114,15 @@ class Game:
             black_profile = True
         self.white_player = self.make_player(player1_mode, player1_name, white_profile, True)
         self.black_player = self.make_player(player2_mode, player2_name, black_profile, False)
+        self.server = None
+        self.interface = None
         
     def make_player(self, mode : int, name : str, profile : bool, white : bool) -> Player:
+       if white: color = WHITE
+       else: color = BLACK
        match mode:
+           case -3:
+               return RemotePlayer(self, name, profile, color)
            case -2:
                return HumanPlayer(self,name, profile)
            case 0:
@@ -88,19 +131,27 @@ class Game:
                return MinimaxPlayer(self, name, profile, n, white)
               
 
-    def select(self, x : int, y : int) -> None:
-        target = self.board.get_piece(x,y)
-        if target is None:
-            if self.selected is not None:
-                if self.board.move(self.selected,x,y):
-                    if self.board.has_valid_moves(self.selected):
-                        self.mark_selected(self.selected)
-                    else:
-                        self.mark_selected(None)
-                    self.gui.update()
+    def select(self, x : int, y : int) -> bool:
+        if self.interface is not None:
+            self.interface.send_select(x,y)
+            board, selected = self.interface.send("get")
+            self.board = board
+            self.selected = selected
+        else:
+            target = self.board.get_piece(x,y)
+            if target is None:
+                if self.selected is not None:
+                    if self.board.move(self.selected,x,y):
+                        if self.board.has_valid_moves(self.selected):
+                            self.mark_selected(self.selected)
+                        else:
+                            self.mark_selected(None)
+                            return True
+                        self.gui.update()
 
-        elif target.color == self.board.active_player:
-            self.mark_selected(target)
+            elif target.color == self.board.active_player:
+                self.mark_selected(target)
+            return False
 
     def mark_selected(self, target : Piece) -> None:
         self.selected = target
@@ -115,7 +166,7 @@ class Game:
             self.manager.register_loss()
 
     @property
-    def selected_tile(self) -> tuple[int,int]:
+    def selected_tile(self) -> tuple[int,int] | None:
         if self.selected is None: return None
         return self.selected.x,self.selected.y
     
