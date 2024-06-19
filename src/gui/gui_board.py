@@ -117,9 +117,9 @@ class GUIBoard(QFrame):
                 square = Tile(self,row,col)
                 square.clicked.connect(partial(self.tile_click,row,col))
                 if row % 2 == col % 2:
-                    square.setStyleSheet(f'background-color: {WHITE_TILE_COLOR}')
+                    square.setStyleSheet('Tile { background-color: '+ WHITE_TILE_COLOR  +' }')
                 else:
-                    square.setStyleSheet(f'background-color: {BROWN_TILE_COLOR}')
+                    square.setStyleSheet('Tile { background-color: '+ BROWN_TILE_COLOR  +' }')
                 self.layout.addWidget(square, row, col)
                 self.tiles[-1].append(square)
         self.update()
@@ -148,14 +148,14 @@ class GUIBoard(QFrame):
 
                 if i % 2 == j % 2:
                     if (i,j) == self.game.selected_tile:
-                        tile.setStyleSheet(f'background-color: {SELECTED_WHITE_TILE_COLOR}')
+                        tile.setStyleSheet('Tile { background-color: '+ SELECTED_WHITE_TILE_COLOR  +' }')
                     else:
-                        tile.setStyleSheet(f'background-color: {WHITE_TILE_COLOR}')
+                        tile.setStyleSheet('Tile { background-color: '+ WHITE_TILE_COLOR  +' }')
                 else:
                     if (i,j) == self.game.selected_tile:
-                        tile.setStyleSheet(f'background-color: {SELECTED_BROWN_TILE_COLOR}')
+                        tile.setStyleSheet('Tile { background-color: '+ SELECTED_BROWN_TILE_COLOR  +' }')
                     else:
-                        tile.setStyleSheet(f'background-color: {BROWN_TILE_COLOR}')
+                        tile.setStyleSheet('Tile { background-color: '+ BROWN_TILE_COLOR  +' }')
 
                 marked = self.game.marked_tiles
                 valid_moves = self.game.selected_valid_moves

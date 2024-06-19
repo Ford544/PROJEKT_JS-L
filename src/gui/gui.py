@@ -16,7 +16,7 @@ class GUI:
 
     def init(self):
         self.app = QApplication([])
-        self.app.setStyle('Fusion')
+        #self.app.setStyle('Fusion')
         self.manager = ProfileManager(Path("profiles"))
         self.manager.load()
         self.game = Game(self,self.manager)

@@ -33,6 +33,7 @@ class ClientInterface:
             return None
         
     def send_select(self, x : int, y : int):
+        print(f"sending select {(x,y)}")
         return self.send(encode(x,y))
 
     def send(self, data : str):
@@ -43,4 +44,5 @@ class ClientInterface:
             return None
         
     def close(self):
+        print("closing connection (client)")
         self.server.close()

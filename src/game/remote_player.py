@@ -13,14 +13,16 @@ class RemotePlayer(Player):
 
     def pass_control(self) -> bool:
         if self.game.interface is not None:
-            print("server player turn")
+            #print("server player turn")
             try:
                 board,selected = self.game.interface.send("get")
                 self.game.board = board
                 self.game.selected = selected
-                time.sleep(0.25)
+                time.sleep(0.05)
                 self.game.gui.update()
             except:
                 print("connection lost")
                 self.game.paused = True
-        return False
+            return False
+        else:
+            return True

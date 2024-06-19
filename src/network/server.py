@@ -56,10 +56,12 @@ class Server:
         while not self.closed:
             try:
                 data = conn.recv(4096).decode()
-                print("server received: ", data)
+                #print("server received: ", data)
                 if data != "get":
                     coords = decode(data)
-                    if coords is not None: x,y = coords
+                    if coords is not None: 
+                        x,y = coords
+                        print(f"receiving coords: {(x,y)}")
                     if self.game.select(x,y):
                         self.game.enable_tiles()
                     
@@ -79,4 +81,5 @@ class Server:
             print("wait_for_conn has a problem: ", e)
 
     def shut_down(self):
+        print("closing connection (server)")
         self.socket_.close()

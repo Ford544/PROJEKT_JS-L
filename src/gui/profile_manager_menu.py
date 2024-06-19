@@ -29,10 +29,7 @@ class ProfileManagerMenu(QFrame):
         left_layout = QVBoxLayout()
         left_frame = QFrame()
         left_frame.setLayout(left_layout)
-        left_frame.setStyleSheet("QFrame{ background-color: #AAAAAA; border: 2px solid #CCCCCC; border-radius: 6px; font-size: 12pt}"
-                                    + "QPushButton{ background-color: #777777; border: 2px solid #888888; border-radius: 5px; font-size: 12pt }"
-                                    + "QPushButton:hover { background-color: #888888 }"
-                                    + "QLabel { border: 0px none}")
+        left_frame.setStyleSheet(MENU_STYLE)
         self.profile_list = QListWidget()
         self.profile_list.setStyleSheet("QListWidget{ font-size: 18pt }")
         self.profile_list.itemSelectionChanged.connect(self.profile_list_selection_change_effect)
