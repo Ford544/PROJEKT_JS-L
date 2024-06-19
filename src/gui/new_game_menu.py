@@ -52,7 +52,7 @@ class NewGameMenu(QFrame):
         self.make_radio_button("Random AI", self.user1_radio_group, 0, user1_button_layout)
         self.make_radio_button("Weak AI", self.user1_radio_group, 2, user1_button_layout)
         self.make_radio_button("Strong AI", self.user1_radio_group, 3, user1_button_layout)
-        self.make_radio_button("Remote", self.user1_radio_group, -3, user1_button_layout)
+        self.make_radio_button("Remote", self.user1_radio_group, -4, user1_button_layout)
         self.user1_radio_group.button(-2).setChecked(True)
         
         user1_layout.addWidget(self.user1_name_input)
@@ -72,7 +72,7 @@ class NewGameMenu(QFrame):
         self.make_radio_button("Random AI", self.user2_radio_group, 0, user2_button_layout)
         self.make_radio_button("Weak AI", self.user2_radio_group, 2, user2_button_layout)
         self.make_radio_button("Strong AI", self.user2_radio_group, 3, user2_button_layout)
-        self.make_radio_button("Remote", self.user2_radio_group, -3, user2_button_layout)
+        self.make_radio_button("Remote", self.user2_radio_group, -4, user2_button_layout)
         self.user2_radio_group.button(2).setChecked(True)
 
         user2_layout.addWidget(self.user2_name_input)
@@ -218,14 +218,14 @@ class NewGameMenu(QFrame):
             self.profile_player_radio_group.button(1).setChecked(True)
             self.profile_player_radio_group.button(1).setHidden(False)
             self.profile_player_radio_group.button(2).setHidden(False)
-        if user1_mode == -3:
+        if user1_mode == -4:
             self.profile_player_radio_group.button(2).setChecked(True)
             self.profile_player_radio_group.button(1).setHidden(True)
             self.profile_player_radio_group.button(2).setHidden(True)
             self.user2_radio_group.button(-2).setChecked(True)
             self.host_button.setDisabled(False)
             self.start_button.setDisabled(True)
-        elif user2_mode == -3:
+        elif user2_mode == -4:
             self.profile_player_radio_group.button(1).setChecked(True)
             self.profile_player_radio_group.button(1).setHidden(True)
             self.profile_player_radio_group.button(2).setHidden(True)

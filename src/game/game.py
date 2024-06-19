@@ -7,7 +7,8 @@ from .player import Player
 from .human_player import HumanPlayer
 from .random_player import RandomPlayer
 from .minimax_player import MinimaxPlayer
-from.remote_player import RemotePlayer
+from .remote_player import RemotePlayer
+from .client_player import ClientPlayer
 from ..profiles.profile_manager import ProfileManager
 from ..network.server import Server
 from ..network.client_interface import ClientInterface
@@ -72,7 +73,9 @@ class Game:
 
     #an information about waiting for connection?
     def host(self, port) -> bool:
-        self.server = Server(port,self)
+        if isinstance(self.white_player, HumanPlayer): host_color = WHITE
+        else : host_color = BLACK
+        self.server = Server(port,self.board,self.selected,self.white_player.name,self.black_player.name, host_color)
         if self.server.set_up():
             print("server is all set up")
             self.server.run()
@@ -129,6 +132,8 @@ class Game:
        if white: color = WHITE
        else: color = BLACK
        match mode:
+           case -4:
+               return ClientPlayer(self,name, profile)
            case -3:
                return RemotePlayer(self, name, profile, color)
            case -2:
@@ -139,7 +144,7 @@ class Game:
                return MinimaxPlayer(self, name, profile, n, white)
               
 
-    def select(self, x : int, y : int) -> bool:
+    def select(self, x : int, y : int) -> None:
         if self.interface is not None:
             try:
                 self.interface.send_select(x,y)
@@ -148,6 +153,9 @@ class Game:
                 self.selected = selected
             except:
                 print("connection lost")
+        elif self.server is not None:
+            self.server.select(x,y)
+            self.board, self.selected = self.server.get_state()
         else:
             target = self.board.get_piece(x,y)
             if target is None:
@@ -157,12 +165,10 @@ class Game:
                             self.mark_selected(self.selected)
                         else:
                             self.mark_selected(None)
-                            return True
                         self.gui.update()
 
             elif target.color == self.board.active_player:
                 self.mark_selected(target)
-            return False
 
     def mark_selected(self, target : Piece) -> None:
         self.selected = target

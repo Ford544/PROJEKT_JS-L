@@ -13,12 +13,16 @@ class Server:
     socket_ : socket.socket
     closed : bool
 
-    def __init__(self, port : int, game):
+    def __init__(self, port : int, board, selected, white_name, black_name, host_color):
         self.ip = self.get_ip()
         print(self.ip)
         print(port)
         self.port = port
-        self.game = game
+        self.board = board
+        self.selected = selected
+        self.white_name = white_name
+        self.black_name = black_name
+        self.host_color = host_color
         self.closed = False
 
     def set_up(self) -> bool:
@@ -49,10 +53,10 @@ class Server:
         start_new_thread(self.wait_for_conn, tuple())
     
     def listen(self, conn):
-        if isinstance(self.game.white_player, HumanPlayer):
-            conn.send(pickle.dumps((WHITE,self.game.white_player.name)))
+        if self.host_color == WHITE:
+            conn.send(pickle.dumps((WHITE,self.white_name)))
         else:
-            conn.send(pickle.dumps((BLACK,self.game.black_player.name)))
+            conn.send(pickle.dumps((BLACK,self.black_name)))
         while not self.closed:
             try:
                 data = conn.recv(4096).decode()
@@ -62,10 +66,8 @@ class Server:
                     if coords is not None: 
                         x,y = coords
                         print(f"receiving coords: {(x,y)}")
-                    if self.game.select(x,y):
-                        self.game.enable_tiles()
-                    
-                conn.send(pickle.dumps((self.game.board, self.game.selected)))
+                    self.select(x,y)                
+                conn.send(pickle.dumps((self.board, self.selected)))
             except:
                 break
 
@@ -83,3 +85,17 @@ class Server:
     def shut_down(self):
         print("closing connection (server)")
         self.socket_.close()
+
+    def select(self, x : int, y : int) -> None:
+        target = self.board.get_piece(x,y)
+        if target is None:
+            if self.selected is not None:
+                if self.board.move(self.selected,x,y):
+                    if not self.board.has_valid_moves(self.selected):
+                        self.selected = None
+        elif target.color == self.board.active_player:
+            self.selected = target
+        return False
+    
+    def get_state(self):
+        return self.board, self.selected
