@@ -178,6 +178,8 @@ class Game:
 
     #tell the profile manager about the result
     def register_game(self, winner : Player | None) -> None:
+        if not self.white_player.profile and not self.black_player.profile:
+            return
         if winner is None:
             self.manager.register_draw()
         elif winner.profile:
