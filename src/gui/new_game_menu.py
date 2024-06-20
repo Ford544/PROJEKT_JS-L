@@ -199,7 +199,9 @@ class NewGameMenu(QFrame):
     def return_button_effect(self) -> None:
         self.window.go_to_menu()
         
-    def player_mode_change(self) -> None:
+    def player_mode_change(self, button, to_true) -> None:
+        if not to_true:
+            return
         user1_mode = self.user1_radio_group.checkedId()
         user2_mode = self.user2_radio_group.checkedId()
         if user1_mode >= 0 and user2_mode >= 0:
@@ -218,20 +220,28 @@ class NewGameMenu(QFrame):
             self.profile_player_radio_group.button(1).setChecked(True)
             self.profile_player_radio_group.button(1).setHidden(False)
             self.profile_player_radio_group.button(2).setHidden(False)
-        if user1_mode == -4:
+        if user1_mode == -4 and button in self.user1_radio_group.buttons():
             self.profile_player_radio_group.button(2).setChecked(True)
             self.profile_player_radio_group.button(1).setHidden(True)
             self.profile_player_radio_group.button(2).setHidden(True)
             self.user2_radio_group.button(-2).setChecked(True)
             self.host_button.setDisabled(False)
             self.start_button.setDisabled(True)
-        elif user2_mode == -4:
+        elif user2_mode == -4 and button in self.user2_radio_group.buttons():
             self.profile_player_radio_group.button(1).setChecked(True)
             self.profile_player_radio_group.button(1).setHidden(True)
             self.profile_player_radio_group.button(2).setHidden(True)
             self.user1_radio_group.button(-2).setChecked(True)
             self.host_button.setDisabled(False)
             self.start_button.setDisabled(True)
+        elif button in self.user1_radio_group.buttons() and user1_mode != -2 and user2_mode == -4:
+            self.user2_radio_group.button(-2).setChecked(True)
+            self.host_button.setDisabled(True)
+            self.start_button.setDisabled(False)
+        elif button in self.user2_radio_group.buttons() and user2_mode != -2 and user1_mode == -4:
+            self.user1_radio_group.button(-2).setChecked(True)
+            self.host_button.setDisabled(True)
+            self.start_button.setDisabled(False)
         else:
             self.host_button.setDisabled(True)
             self.start_button.setDisabled(False)

@@ -11,6 +11,7 @@ class MainMenu(QFrame):
     new_game_button : QPushButton
     profiles_button : QPushButton
     join_button : QPushButton
+    exit_button : QPushButton
     profile_name_banner : QLabel
     
     def __init__(self, parent, window : QMainWindow):
@@ -47,6 +48,10 @@ class MainMenu(QFrame):
         self.profiles_button = QPushButton("Profiles")
         self.profiles_button.clicked.connect(self.profiles_button_effect)
         button_layout.addWidget(self.profiles_button)
+
+        self.exit_button = QPushButton("Exit")
+        self.exit_button.clicked.connect(self.exit_button_effect)
+        button_layout.addWidget(self.exit_button)
         button_layout.addStretch()
 
         self.profile_name_banner = QLabel()
@@ -75,6 +80,9 @@ class MainMenu(QFrame):
         if dialog.exec() == QDialog.Accepted:
             ip, port = dialog.getInputs()
             self.window.connect_to_game(ip, port)
+
+    def exit_button_effect(self):
+        self.window.close()
 
     def set_profile_name_message(self) -> None:
         if self.window.manager.active_profile is not None:
