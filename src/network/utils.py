@@ -5,5 +5,5 @@ def decode(message : str) -> tuple[int,int] | None:
     except:
         return None
         
-def encode(x : int, y : int):
+def encode(x : int, y : int) -> str:
     return str(x) + "," + str(y)

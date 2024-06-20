@@ -3,6 +3,7 @@ import time
 
 from .player import Player
 
+#implemented for testing purposes, but can be used in the final version
 
 class RandomPlayer(Player):
 

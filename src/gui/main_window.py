@@ -76,9 +76,13 @@ class MainWindow(QMainWindow):
         self.game_view.game.host(port)
         self.game_view.game.play()
 
-    def connect_to_game(self, ip : str, port : str, name : str = "Joe"):
+    def connect_to_game(self, ip : str, port : str):
         self.game_view.board.set_up()
         self.game_view.game.paused = False
+        if self.manager.active_profile is not None:
+            name = self.manager.active_profile.name
+        else:
+            name = "Anonymous"
         try:
             port = int(port)
             self.game_view.game.join(ip, port, name)

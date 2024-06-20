@@ -11,6 +11,8 @@ class Player(ABC):
         self.name = name
         self.profile = profile
 
+    #this method should return False if the whole move is executed in one call
+    #                          True if the game should pause the game and wait for the move (the player took control)
     @abstractmethod
     def pass_control(self) -> bool:
         pass

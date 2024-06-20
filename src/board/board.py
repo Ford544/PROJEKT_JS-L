@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from .piece import Piece
 from ..consts import BLACK, WHITE, CAPTURING_OBLIGATORY, MAXIMUM_CAPTURING_OBLIGATORY, DRAW, DRAW_MOVE_THRESHOLD
 
@@ -12,6 +10,7 @@ class Move:
         self.steps = steps
         self.jumped = jumped
 
+    #remove first step/jumped and return true if there are still more steps 
     def pop(self) -> bool:
         if len(self.steps) == 0:
             return False
@@ -53,6 +52,7 @@ class Board:
     width : int
     height : int
 
+    #rules
     capturing_obligatory : int
     pieces_capturing_backwards : bool
     flying_kings : bool
@@ -93,6 +93,7 @@ class Board:
 
         self.update_valid_moves(self.active_player)
 
+    #helper function for building board
     def starting_location_piece(self, row : int, col : int) -> Piece | None:
         if row < self.size / 2 - 1 and row % 2 != col % 2:
             return Piece(row,col,WHITE)
@@ -146,6 +147,7 @@ class Board:
     def get_piece(self, x : int, y : int) -> Piece | None:
         return self.board[x][y]
     
+    #fill the valid moves dict
     def update_valid_moves(self, turn : int) -> None:
         longest_jump_length = 0
         
@@ -162,19 +164,19 @@ class Board:
         elif self.capturing_obligatory == MAXIMUM_CAPTURING_OBLIGATORY:
             self.valid_moves = {piece : list(filter(lambda move : len(move.jumped) == longest_jump_length, moves)) for piece, moves in self.valid_moves.items()}
         
-    
+    #starter function for the valid move finding algorithm
     def get_valid_piece_moves(self, piece : Piece) -> list[Move]:
         return self.get_piece_moves(piece.x,piece.y,piece,[])
 
+    #find all moves for a piece in a particular position, after possibly capturing some pieces; indirectly recursive
     def get_piece_moves(self, start_x : int, start_y : int, piece : Piece, jumped : list[tuple[int]], crowned : bool = False) -> list[Move]:
         moves = []
         for vector in [(-1,-1),(-1,1),(1,-1),(1,1)]:
             moves = moves + self.check_diagonal(start_x,start_y,piece,vector,jumped, crowned)
         return moves
 
+    #get possible move along a particular diagonal vector
     def check_diagonal(self, start_x : int, start_y : int, piece : Piece, vector : tuple[int], jumped : list[tuple[int]], crowned : bool) -> list[Move]:
-        if crowned:
-            print("I got passed the crowned flag!")
         #NOTE: the piece can be crowned because it's already a king, OR because it's going to become one on this branch
         #of the move tree (in which case it was passed to the recursive call)
         if piece.is_king: crowned = True      
@@ -229,7 +231,6 @@ class Board:
         #recursively look for further moves for all jumps
         for jump,captured in zip(jumps,potential_jumped):
             if self.mid_jump_crowning and self.check_crowning(piece,jump[0]):
-                print("future crowning: ", jump)
                 future_crowning = True
             else:
                 future_crowning = False
@@ -279,6 +280,7 @@ class Board:
             return True
         return False
     
+    #immediately execute an enitre move sequence; used for simulations in minimax
     def execute_full_move(self, piece : Piece, move : Move) -> None:
         for x, y in move.steps:
             self.move(piece, x, y)
@@ -290,6 +292,7 @@ class Board:
             self.pieces.remove(self.board[x][y])
         self.board[x][y] = None 
 
+    #update the valid_moves dict based on a move
     def prune_valid_moves(self, piece : Piece, x : int, y : int) -> None:
         new_moves = []
         for move in self.valid_moves[piece]:

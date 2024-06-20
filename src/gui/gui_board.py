@@ -21,9 +21,6 @@ SELECTED_WHITE_TILE_COLOR = "#AAAAAA"
 BROWN_TILE_COLOR = "#B58863"
 SELECTED_BROWN_TILE_COLOR = "#855843"
 
-WHITE_CROWN_PATH = "assets/white_crown.png"
-BLACK_CROWN_PATH = "assets/black_crown.png"
-
 class Tile(QLabel):
 
     clicked = Signal()
@@ -56,16 +53,18 @@ class Tile(QLabel):
             pen = QPen(qcolor, 3, Qt.SolidLine)
             qp.setPen(pen)
            
-            
+            #draw the piece itself
             radius = min(rect.width(), rect.height()) // 3 - pen.width() // 3
             qp.drawEllipse(center, radius, radius)
             radius = min(rect.width(), rect.height()) // 4 - pen.width() // 4
             qp.drawEllipse(center, radius, radius)
 
+            #add a plus sign to distinguish the king
             if self.content == WHITE_KING or self.content == BLACK_KING:
                 qp.drawLine(center.x() - radius, center.y(), center.x() + radius, center.y())
                 qp.drawLine(center.x(), center.y() - radius, center.x(), center.y() + radius)
                 
+            #if marked for removal, cross over in red
             if self.marked:
                 pen = QPen(QColor(255, 0, 0), 5, Qt.SolidLine)
                 qp.setPen(pen)
@@ -144,7 +143,6 @@ class GUIBoard(QFrame):
             for j in range(self.game.board.width):
                 contents = self.game.board.get_piece(i,j)
                 tile = self.tiles[i][j]
-                #print(f"{i}:{j}: {contents}")
 
                 if i % 2 == j % 2:
                     if (i,j) == self.game.selected_tile:
@@ -173,7 +171,6 @@ class GUIBoard(QFrame):
                             tile.content = BLACK_KING
                         else:  
                             tile.content = BLACK_PIECE
-                    #print(self.game.board.marked)
                     if (contents.x,contents.y) in marked:
                         tile.marked = True
                     else:

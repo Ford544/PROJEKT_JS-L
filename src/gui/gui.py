@@ -16,7 +16,6 @@ class GUI:
 
     def init(self):
         self.app = QApplication([])
-        #self.app.setStyle('Fusion')
         self.manager = ProfileManager(Path("profiles"))
         self.manager.load()
         self.game = Game(self,self.manager)
@@ -24,7 +23,6 @@ class GUI:
         self.window.show()
 
         self.window.update()
-        #self.game.play()
         self.run()
     
     def run(self) -> None:
@@ -44,8 +42,3 @@ class GUI:
     
     def set_banner_text(self, text : str) -> None:
         return self.window.set_banner_text(text)
-
-
-if __name__ == "__main__":
-    gui = GUI()
-    gui.init()

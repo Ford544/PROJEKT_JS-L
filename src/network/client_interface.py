@@ -1,9 +1,10 @@
 import socket
 from _thread import *
 import pickle
-import time
 
 from .utils import encode
+
+#this class handles communication with the server from the client side
 
 class ClientInterface:
 
@@ -13,8 +14,6 @@ class ClientInterface:
 
 
     def __init__(self, ip : str, port : int, game):
-        print(ip)
-        print(port)
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.ip = ip
         self.port = port
@@ -22,18 +21,16 @@ class ClientInterface:
         self.game = game
 
     def connect(self):
-        print(self.addr)
         try:
-            print("we're about to connect...")
             self.server.connect(self.addr)
-            print("connected")
+            #print("connected")
             return pickle.loads(self.server.recv(4096))
         except error as e:
             print(e)
             return None
         
     def send_select(self, x : int, y : int):
-        print(f"sending select {(x,y)}")
+        #print(f"sending select {(x,y)}")
         return self.send(encode(x,y))
 
     def send(self, data : str):
@@ -44,5 +41,5 @@ class ClientInterface:
             return None
         
     def close(self):
-        print("closing connection (client)")
+        #print("closing connection (client)")
         self.server.close()

@@ -70,7 +70,6 @@ class ProfileManagerMenu(QFrame):
         self.stat_labels["win_ratio"] = QLabel()
         self.clear_stats()
         for label in self.stat_labels.values():
-            #print(label)
             right_layout.addWidget(label)
 
         if manager.active_profile is not None:
@@ -97,10 +96,8 @@ class ProfileManagerMenu(QFrame):
         self.stat_labels["draws"].setText("Draws: -")
         self.stat_labels["win_ratio"].setText(f"Win ratio: -")
 
-    #enable/disable buttons?
     def profile_list_selection_change_effect(self) -> None:
         selected = self.profile_list.currentItem()
-        print(selected.text())
         if selected is not None:
             profile = self.manager.get_profile(selected.text())
             if profile is not None:

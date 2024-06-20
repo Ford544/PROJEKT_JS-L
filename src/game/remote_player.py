@@ -2,6 +2,7 @@ import time
 
 from .player import Player
 
+#represents the remote server player from the perspective of the client
 
 class RemotePlayer(Player):
 
@@ -19,6 +20,5 @@ class RemotePlayer(Player):
             time.sleep(0.05)
             self.game.gui.update()
         except:
-            print("connection lost")
             self.game.paused = True
         return False

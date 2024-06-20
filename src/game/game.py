@@ -1,6 +1,3 @@
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
-
 from ..board.piece import Piece
 from ..board.board import Board
 from .player import Player
@@ -33,7 +30,7 @@ class Game:
         #player modes:
         # -4 - client
         # -3 - remote (server)
-        # -2 - human
+        # -2 - local human
         # 0 - random ai
         # n = 1,2,3,... - minimax with depth n
 
@@ -71,17 +68,18 @@ class Game:
             self.gui.set_banner_text(f"Game ends in draw!")
             self.register_game(None)
 
-    #an information about waiting for connection?
-    def host(self, port) -> bool:
-        if isinstance(self.white_player, HumanPlayer): host_color = WHITE
-        else : host_color = BLACK
-        self.server = Server(port,self.board,self.selected,self.white_player.name,self.black_player.name, host_color)
+    def host(self, port : int) -> bool:
+        if isinstance(self.white_player, HumanPlayer): 
+            host_color = WHITE
+            client_player = self.black_player
+        else : 
+            host_color = BLACK
+            client_player = self.white_player
+        self.server = Server(port,self.board,self.selected,self.white_player.name,self.black_player.name, host_color, client_player)
         if self.server.set_up():
-            print("server is all set up")
             self.server.run()
             return True
         else:
-            print("server failed to get off the ground")
             return False
         
     def join(self, ip : str, port : int, name : str) -> bool:
@@ -96,6 +94,7 @@ class Game:
             else:
                 self.white_player = RemotePlayer(self, remote_name, False, WHITE)
                 self.black_player = HumanPlayer(self, name, True)
+            self.interface.send(f"name={name}")
             board, selected = self.interface.send("get")
             self.board = board
             self.selected = selected
@@ -145,6 +144,7 @@ class Game:
               
 
     def select(self, x : int, y : int) -> None:
+        #if we are a client, send select to the server
         if self.interface is not None:
             try:
                 self.interface.send_select(x,y)
@@ -152,10 +152,12 @@ class Game:
                 self.board = board
                 self.selected = selected
             except:
-                print("connection lost")
+                pass
+        #if we are the server, directly execute the select in the server
         elif self.server is not None:
             self.server.select(x,y)
             self.board, self.selected = self.server.get_state()
+        #if local game, handle the select here
         else:
             target = self.board.get_piece(x,y)
             if target is None:
@@ -174,6 +176,7 @@ class Game:
         self.selected = target
         self.gui.update()
 
+    #tell the profile manager about the result
     def register_game(self, winner : Player | None) -> None:
         if winner is None:
             self.manager.register_draw()

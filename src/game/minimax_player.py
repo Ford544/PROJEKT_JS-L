@@ -23,6 +23,7 @@ class MinimaxPlayer(Player):
         
         _, best_moves = self.minimax(self.game.board, self.depth, self.white, float("-inf"), float("+inf"))
 
+        #if there are multiple moves with the same score, pick a random one
         piece, move = random.choice(best_moves)
         
         self.game.select(piece.x, piece.y)
@@ -35,6 +36,7 @@ class MinimaxPlayer(Player):
         
         return False
     
+    #return the best move score and a list of moves with that score
     def minimax(self, board : Board, level : int, max_ : bool, alpha : float, beta : float) -> tuple[float, list[tuple[Piece, Move]]]:
         value = self.evaluate_board(board)
         if level == 0 or value == float("+inf") or value == float("-inf"):
@@ -75,7 +77,7 @@ class MinimaxPlayer(Player):
             return current_minimum, best_moves
             
         
-    
+    #white maximizes, black minimizes
     def evaluate_board(self, board : Board) -> float:
         if board.winner == WHITE:
             return float("+inf")
@@ -85,6 +87,7 @@ class MinimaxPlayer(Player):
             return 0.
         return float(board.whites - board.blacks + 0.5*board.white_kings - 0.5*board.black_kings)
     
+    #get copy of the board after executing a particular move sequence
     def simulate_move(self, board : Board , piece : Piece, move : Move) -> Board:
 
         new_board = copy.deepcopy(board)

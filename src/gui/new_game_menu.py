@@ -199,11 +199,13 @@ class NewGameMenu(QFrame):
     def return_button_effect(self) -> None:
         self.window.go_to_menu()
         
-    def player_mode_change(self, button, to_true) -> None:
+    def player_mode_change(self, button : QAbstractButton, to_true : bool) -> None:
         if not to_true:
             return
         user1_mode = self.user1_radio_group.checkedId()
         user2_mode = self.user2_radio_group.checkedId()
+        #with most player mode combinations, we can guess which player is supposed to be profile player
+        #in human vs human games we make available radio buttons to choose which one is profile player
         if user1_mode >= 0 and user2_mode >= 0:
             self.profile_player_radio_group.button(0).setChecked(True)
             self.profile_player_radio_group.button(1).setHidden(True)
@@ -220,6 +222,9 @@ class NewGameMenu(QFrame):
             self.profile_player_radio_group.button(1).setChecked(True)
             self.profile_player_radio_group.button(1).setHidden(False)
             self.profile_player_radio_group.button(2).setHidden(False)
+        #remote mode can only be paired with human mode
+        #also, host_game button is only available if one of the player is set to remote,
+        #while start_game button is available if neither player is remote
         if user1_mode == -4 and button in self.user1_radio_group.buttons():
             self.profile_player_radio_group.button(2).setChecked(True)
             self.profile_player_radio_group.button(1).setHidden(True)
@@ -246,6 +251,7 @@ class NewGameMenu(QFrame):
             self.host_button.setDisabled(True)
             self.start_button.setDisabled(False)
 
+    #ruleset definitions
     def ruleset_change(self) -> None:
         ruleset = self.ruleset_radio_group.checkedId()
         if ruleset == BRAZILIAN:
@@ -267,6 +273,7 @@ class NewGameMenu(QFrame):
         self.flying_kings_checkbox.setChecked(flying_kings)
         self.mid_jump_crowning_checkbox.setChecked(mid_jump_crowning)
 
+    #helper function to eliminate repeating gui building patterns
     def make_radio_button(self, text : str, group : QButtonGroup, id : int, layout : QLayout) -> None:
         radio = QRadioButton(text)
         group.addButton(radio)
