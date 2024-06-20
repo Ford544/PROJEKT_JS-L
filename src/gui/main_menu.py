@@ -106,7 +106,7 @@ class RemoteJoinDialog(QDialog):
         self.label2 = QLabel("Port:")
         main_layout.addWidget(self.label2)
         self.input2 = QLineEdit(self)
-        self.input2.setText("5555")
+        self.input2.setText("52000")
         main_layout.addWidget(self.input2)
         
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
